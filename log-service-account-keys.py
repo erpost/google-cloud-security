@@ -9,7 +9,9 @@ from dateutil.relativedelta import relativedelta
 
 """logs all Service Accounts Keys that are older than 90 days"""
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
+if os.path.isfile(get_key()):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
+
 alert = False
 
 path = os.path.join(os.path.dirname(__file__), 'logs/')
@@ -49,7 +51,7 @@ for project in get_projects():
 
             if key_age_years > 0:
                 key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                if key_age_days < 90:
+                if key_age_days > 90:
                     alert = True
                     logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
 
