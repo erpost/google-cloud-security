@@ -145,7 +145,7 @@ def get_service_account_keys():
 
 
 def send_email():
-    pass
+    print('Sending email...')
 
 
 if __name__ == "__main__":
