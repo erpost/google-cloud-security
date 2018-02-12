@@ -52,11 +52,10 @@ for project in get_projects():
 
                 if key_age_years > 0:
                     key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                    if key_age_days > 90:
+                    if key_age_days > 1:
                         alert = True
                         logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
-    except KeyError as ke:
-        pprint(ke)
-
+    except KeyError:
+        pass
 if alert is False:
     logger.info('No Service Account Keys older than 90 days found')
