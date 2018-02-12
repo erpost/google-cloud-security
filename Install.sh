@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Tested with CentOS 7
 
@@ -13,11 +13,3 @@ sudo yum -y install python34-setuptools
 sudo python3 /usr/lib/python3.4/site-packages/easy_install.py pip
 sudo -H pip3 install --upgrade pip
 sudo -H pip3 install virtualenv
-
-# Create VirtualEnv and activate
-
-cd ~
-virtualenv venv --python=python3.4
-source venv/bin/activate
-
-pip3 install -r google-python-security/requirements.txt

@@ -1,13 +1,30 @@
 - Install Python 3, virtualenv, pip and requirements (see install.sh)
-
+- Create Virtualenv and install requirements (run the commands below)
+    - cd ~
+    - virtualenv venv --python=python3.4
+    - source venv/bin/activate
+    - pip3 install -r google-python-security/requirements.txt
 - Within your Google Cloud Project, create a Service Account with No Role and download JSON Key
-
-- Associate the GCP Service Account at the Organizational Level and give Storage Admin Permissions
-
+- Associate the GCP Service Account at the Organizational Level and give the following custom permissions:
+    - Compute Network Viewer permissions:
+        - compute.networks.get
+        - compute.networks.list
+        - resourcemanager.projects.get
+    - Custom Service Account & Key Viewer Permissions:
+        - iam.serviceAccountKeys.get
+        - iam.serviceAccountKeys.list
+        - iam.serviceAccounts.get
+        - iam.serviceAccounts.list
+        - resourcemanager.projects.get
+    - Custom Storage Viewer:
+        - storage.buckets.get
+        - storage.buckets.getIamPolicy
+        - storage.buckets.list
+        - storage.objects.get
+        - storage.objects.getIamPolicy
+        - storage.objects.list
+        - resourcemanager.projects.get
 - Create the directory: ~/.gcp
-
 - Move Service Account Key and rename file to: ~/.gcp/[key file].json
-
 - Clone Repo
-
 - Modify gcp.py and add Service Account Key name to get_function()

@@ -35,6 +35,7 @@ for project in get_projects():
     service = discovery.build('iam', 'v1')
     request = service.projects().serviceAccounts().list(name=project_name)
     response = request.execute()
+
     try:
         accounts = response['accounts']
         for account in accounts:
