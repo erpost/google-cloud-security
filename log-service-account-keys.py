@@ -7,7 +7,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
-"""logs all Service Accounts Keys that are older than 90 days"""
+# Logs all Service Accounts Keys that are older than 90 days
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()

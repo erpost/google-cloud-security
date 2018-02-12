@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
-"""logs all Default VPC Networks"""
+# logs all Default VPC Networks
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()

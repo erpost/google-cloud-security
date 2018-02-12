@@ -2,6 +2,8 @@ from google.cloud import storage
 from googleapiclient import discovery
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import os
 import logging
 
@@ -104,6 +106,44 @@ def get_default_vpc():
     return alert
 
 
+def get_service_account_keys():
+    """logs all Service Accounts Keys that are older than 90 days"""
+    alert = False
+
+    for project in get_projects():
+        project_name = 'projects/' + project
+        service = discovery.build('iam', 'v1')
+        request = service.projects().serviceAccounts().list(name=project_name)
+        response = request.execute()
+
+        try:
+            accounts = response['accounts']
+            for account in accounts:
+                serviceaccount = project_name + '/serviceAccounts/' + account['email']
+                request = service.projects().serviceAccounts().keys().list(name=serviceaccount)
+                response = request.execute()
+                keys = response['keys']
+
+                for key in keys:
+                    keyname = key['name']
+                    startdate = datetime.strptime(key['validAfterTime'], '%Y-%m-%dT%H:%M:%SZ')
+                    enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
+                    key_age_years = relativedelta(enddate, startdate).years
+
+                    if key_age_years > 0:
+                        key_age_days = relativedelta(datetime.utcnow(), startdate).days
+                        if key_age_days > 90:
+                            alert = True
+                            logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
+        except KeyError:
+            pass
+
+    if alert is False:
+        logger.info('No Service Account Keys older than 90 days found')
+
+    return alert
+
+
 def send_email():
     pass
 
@@ -113,8 +153,10 @@ if __name__ == "__main__":
     world_buckets = get_world_readable_buckets()
     service_accounts = get_default_service_accounts()
     default_vpc = get_default_vpc()
+    service_keys = get_service_account_keys()
 
     if world_buckets is True or\
-       service_accounts is True or\
-       default_vpc is True:
+        service_accounts is True or\
+        service_keys is True or\
+        default_vpc is True:
         send_email()
