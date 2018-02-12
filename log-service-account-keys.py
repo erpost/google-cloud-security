@@ -38,26 +38,25 @@ for project in get_projects():
     response = request.execute()
     try:
         accounts = response['accounts']
+        for account in accounts:
+            serviceaccount = project_name + '/serviceAccounts/' + account['email']
+            request = service.projects().serviceAccounts().keys().list(name=serviceaccount)
+            response = request.execute()
+            keys = response['keys']
+
+            for key in keys:
+                keyname = key['name']
+                startdate = datetime.strptime(key['validAfterTime'], '%Y-%m-%dT%H:%M:%SZ')
+                enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
+                key_age_years = relativedelta(enddate, startdate).years
+
+                if key_age_years > 0:
+                    key_age_days = relativedelta(datetime.utcnow(), startdate).days
+                    if key_age_days > 90:
+                        alert = True
+                        logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
     except KeyError as ke:
         pprint(ke)
-
-    for account in accounts:
-        serviceaccount = project_name + '/serviceAccounts/' + account['email']
-        request = service.projects().serviceAccounts().keys().list(name=serviceaccount)
-        response = request.execute()
-        keys = response['keys']
-
-        for key in keys:
-            keyname = key['name']
-            startdate = datetime.strptime(key['validAfterTime'], '%Y-%m-%dT%H:%M:%SZ')
-            enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
-            key_age_years = relativedelta(enddate, startdate).years
-
-            if key_age_years > 0:
-                key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                if key_age_days > 90:
-                    alert = True
-                    logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
 
 if alert is False:
     logger.info('No Service Account Keys older than 90 days found')
