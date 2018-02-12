@@ -6,7 +6,9 @@ from gcp import get_key, get_projects
 
 """logs all Default VPC Networks"""
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
+if os.path.isfile(get_key()):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
+
 alert = False
 
 path = os.path.join(os.path.dirname(__file__), 'logs/')
