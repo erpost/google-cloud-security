@@ -3,7 +3,7 @@ import os
 
 
 def get_key():
-    storage_key = os.path.expanduser('~/.gcp/cloudsecurity-monitoring-readonly.json')
+    storage_key = os.path.expanduser('~/.gcp/cloudsecurity-monitoring.json')
 
     return storage_key
 
