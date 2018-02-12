@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from pprint import pprint
 
 
 """logs all Service Accounts Keys that are older than 90 days"""
