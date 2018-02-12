@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from pprint import pprint
 
 
 """logs all Service Accounts Keys that are older than 90 days"""
@@ -35,7 +36,10 @@ for project in get_projects():
     service = discovery.build('iam', 'v1')
     request = service.projects().serviceAccounts().list(name=project_name)
     response = request.execute()
-    accounts = response['accounts']
+    try:
+        accounts = response['accounts']
+    except KeyError as ke:
+        pprint(ke)
 
     for account in accounts:
         serviceaccount = project_name + '/serviceAccounts/' + account['email']
