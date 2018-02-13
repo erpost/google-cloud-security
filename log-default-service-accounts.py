@@ -44,8 +44,7 @@ for project in get_projects():
                 logger.warning('Default Service Account "{0}" found in project "{1}"'.
                                format(serviceaccount, project))
     except KeyError:
-        logger.info('No Service Accounts found in project "{0}"'.format(project))
-        pass
+        logger.info('No Service Accounts available in project "{0}"'.format(project))
 
     except:
         logger.warning('Default Service Account - Unknown Error!  Please run manually')
