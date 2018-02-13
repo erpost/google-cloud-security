@@ -33,7 +33,7 @@ for project in get_projects():
     request = service.projects().serviceAccounts().list(name=project_name)
     response = request.execute()
 
-    if len(response) > 0:
+    try:
         accounts = response['accounts']
 
         for account in accounts:
@@ -43,6 +43,12 @@ for project in get_projects():
                 alert = True
                 logger.warning('Default Service Account "{0}" found in project "{1}"'.
                                format(serviceaccount, project))
+    except KeyError:
+        logger.info('No Service Accounts found in project "{0}"'.format(project))
+        pass
+
+    except:
+        logger.warning('Default Service Account - Unknown Error!  Please run manually')
 
 if alert is False:
     logger.info('No Default Service Accounts found')

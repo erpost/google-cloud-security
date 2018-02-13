@@ -65,16 +65,19 @@ def get_default_service_accounts():
 
         try:
             accounts = response['accounts']
-
             for account in accounts:
                 serviceaccount = account['email']
 
                 if 'gserviceaccount.com' in serviceaccount and 'iam' not in serviceaccount:
                     alert = True
                     logger.warning('Default Service Account "{0}" found in project "{1}"'.
-                                   format(serviceaccount, project))
-        except:
+                               format(serviceaccount, project))
+        except KeyError:
+            logger.info('No Service Accounts found in project "{0}"'.format(project))
             pass
+
+        except:
+            logger.warning('Default Service Account - Unknown error.  Please run manually')
 
     if alert is False:
         logger.info('No Default Service Accounts found')
@@ -97,8 +100,13 @@ def get_default_vpc():
                 if vpc == 'default':
                     alert = True
                     logger.warning('Default VPC Network "{0}" found in project "{1}"'.format(vpc, project_name))
-        except:
+
+        except KeyError:
+            logger.info('No VPCs found in project "{0}"'.format(project_name))
             pass
+
+        except:
+            logger.warning('Default VPC Network - Unknown error.  Please run manually')
 
     if alert is False:
         logger.info('No Default VPCs found')
@@ -135,8 +143,13 @@ def get_service_account_keys():
                         if key_age_days > 90:
                             alert = True
                             logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
+
         except KeyError:
+            logger.info('No Service Account keys found in project "{0}"'.format(project))
             pass
+
+        except:
+            logger.warning('Service Account key - Unknown error.  Please run manually')
 
     if alert is False:
         logger.info('No Service Account Keys older than 90 days found')
