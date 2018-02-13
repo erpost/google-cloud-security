@@ -115,7 +115,7 @@ def get_default_vpc():
 
 
 def get_service_account_keys():
-    """logs all Service Accounts Keys that are older than 90 days"""
+    """logs all Service Accounts Keys that are older than 180 days"""
     alert = False
 
     for project in get_projects():
@@ -142,7 +142,7 @@ def get_service_account_keys():
                         key_age_days = relativedelta(datetime.utcnow(), startdate).days
                         if key_age_days > 90:
                             alert = True
-                            logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
+                            logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
 
         except KeyError:
             logger.info('No Service Account keys found in project "{0}"'.format(project))
@@ -152,7 +152,7 @@ def get_service_account_keys():
             logger.warning('Service Account key - Unknown error.  Please run manually')
 
     if alert is False:
-        logger.info('No Service Account Keys older than 90 days found')
+        logger.info('No Service Account Keys older than 180 days found')
 
     return alert
 
