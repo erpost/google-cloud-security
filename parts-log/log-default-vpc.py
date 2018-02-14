@@ -43,8 +43,8 @@ for project_name in get_projects():
     except KeyError:
         logger.info('0 VPCs found in project "{0}"'.format(project_name))
 
-    except:
-        logger.warning('Default VPC Network - Unknown error.  Please run manually')
+    except Exception:
+        logger.error('Default VPC Network - Unknown error.  Please run manually')
 
 if alert is False:
     logger.info('No Default VPCs found')

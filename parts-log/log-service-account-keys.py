@@ -58,8 +58,8 @@ for project in get_projects():
     except KeyError:
         logger.info('0 Service Account keys found in project "{0}"'.format(project))
 
-    except:
-        logger.warning('Service Account key - Unknown error.  Please run manually')
+    except Exception:
+        logger.error('Service Account key - Unknown error.  Please run manually')
 
 if alert is False:
     logger.info('No Service Account Keys older than 90 days found')
