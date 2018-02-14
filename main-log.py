@@ -172,7 +172,7 @@ def get_legacy_bucket_permissions():
                 for member in members:
                     if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
                         alert = True
-                        logger.warning('Legacy "{0}" permission for member "{1}" found applied to Bucket "{2}"'
+                        logger.warning('"{0}" permission for member "{1}" applied to Bucket "{2}"'
                                        ' in project "{3}"'.format(role, member, bucket.name, project_name))
 
     if alert is False:
