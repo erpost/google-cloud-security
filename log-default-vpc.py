@@ -41,7 +41,7 @@ for project_name in get_projects():
                 alert = True
                 logger.warning('Default VPC Network "{0}" found in project "{1}"'.format(vpc, project_name))
     except KeyError:
-        logger.info('No VPCs found in project "{0}"'.format(project_name))
+        logger.info('0 VPCs found in project "{0}"'.format(project_name))
 
     except:
         logger.warning('Default VPC Network - Unknown error.  Please run manually')

@@ -37,8 +37,6 @@ for project_name in get_projects():
         policy = bucket.get_iam_policy()
         for role in policy:
             members = policy[role]
-            # for member in members:
-            #     print(project_name + ' - ' + bucket.name + ' - ' + member + ' - ' + role)
 
             for member in members:
                 if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':

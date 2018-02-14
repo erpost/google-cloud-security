@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
-# Logs Global Permissions from Google Cloud Platform Buckets
+# Logs Global Permissions of Google Cloud Platform Buckets
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()

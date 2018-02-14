@@ -73,7 +73,7 @@ def get_default_service_accounts():
                     logger.warning('Default Service Account "{0}" found in project "{1}"'.
                                    format(serviceaccount, project))
         except KeyError:
-            logger.info('No Service Accounts found in project "{0}"'.format(project))
+            logger.info('0 Service Accounts found in project "{0}"'.format(project))
             pass
 
         except:
@@ -102,7 +102,7 @@ def get_default_vpc():
                     logger.warning('Default VPC Network "{0}" found in project "{1}"'.format(vpc, project_name))
 
         except KeyError:
-            logger.info('No VPCs found in project "{0}"'.format(project_name))
+            logger.info('0 VPCs found in project "{0}"'.format(project_name))
             pass
 
         except:
@@ -145,7 +145,7 @@ def get_service_account_keys():
                             logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
 
         except KeyError:
-            logger.info('No Service Account keys found in project "{0}"'.format(project))
+            logger.info('0 Service Account keys found in project "{0}"'.format(project))
             pass
 
         except:
@@ -182,7 +182,7 @@ def get_legacy_bucket_permissions():
 
 
 def send_email():
-    print('Sending email...')
+    pass
 
 
 if __name__ == "__main__":
