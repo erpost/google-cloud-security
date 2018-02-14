@@ -13,8 +13,8 @@ bucket_dict = {}
 bckts = []
 alert = False
 
-path = os.path.join(os.path.dirname(__file__), 'logs/')
-logfile = os.path.join(path, 'google-security.log')
+path = os.path.expanduser('~/python-logs')
+logfile = os.path.expanduser('~/python-logs/security.log')
 
 if os.path.isdir(path):
     pass
@@ -37,14 +37,13 @@ for project_name in get_projects():
         policy = bucket.get_iam_policy()
         for role in policy:
             members = policy[role]
+            # for member in members:
+            #     print(project_name + ' - ' + bucket.name + ' - ' + member + ' - ' + role)
 
             for member in members:
-                print(project_name + ' - ' + bucket.name + ' - ' + member + ' - ' + role)
-
-            # for member in members:
-            #     if member == 'allUsers' or member == 'allAuthenticatedUsers':
-            #         alert = True
-            #         logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
-            #                        format(member, bucket.name, project_name))
+                if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
+                    alert = True
+                    logger.warning('Legacy "{0}" permission for member "{1}" found applied to Bucket "{2}"'
+                                   ' in project "{3}"'.format(role, member, bucket.name, project_name))
 if alert is False:
-    logger.info('No world-readable Bucket permissions found')
+    logger.info('No Legacy Bucket permissions found')

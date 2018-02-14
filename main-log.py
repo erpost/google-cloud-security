@@ -14,8 +14,8 @@ if os.path.isfile(get_key()):
 bucket_dict = {}
 bckts = []
 
-path = os.path.join(os.path.dirname(__file__), 'logs/')
-logfile = os.path.join(path, 'google-security.log')
+path = os.path.expanduser('~/python-logs')
+logfile = os.path.expanduser('~/python-logs/security.log')
 
 if os.path.isdir(path):
     pass
@@ -71,7 +71,7 @@ def get_default_service_accounts():
                 if 'gserviceaccount.com' in serviceaccount and 'iam' not in serviceaccount:
                     alert = True
                     logger.warning('Default Service Account "{0}" found in project "{1}"'.
-                               format(serviceaccount, project))
+                                   format(serviceaccount, project))
         except KeyError:
             logger.info('No Service Accounts found in project "{0}"'.format(project))
             pass
@@ -157,6 +157,30 @@ def get_service_account_keys():
     return alert
 
 
+def get_legacy_bucket_permissions():
+    """logs all buckets containing legacy permissions"""
+    alert = False
+    for project_name in get_projects():
+        storage_client = storage.Client(project=project_name)
+        buckets = storage_client.list_buckets()
+
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+            for role in policy:
+                members = policy[role]
+
+                for member in members:
+                    if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
+                        alert = True
+                        logger.warning('Legacy "{0}" permission for member "{1}" found applied to Bucket "{2}"'
+                                       ' in project "{3}"'.format(role, member, bucket.name, project_name))
+
+    if alert is False:
+        logger.info('No Legacy Bucket permissions found')
+
+    return alert
+
+
 def send_email():
     print('Sending email...')
 
@@ -167,9 +191,11 @@ if __name__ == "__main__":
     service_accounts = get_default_service_accounts()
     default_vpc = get_default_vpc()
     service_keys = get_service_account_keys()
+    legacy_buckets = get_legacy_bucket_permissions()
 
     if world_buckets is True or\
         service_accounts is True or\
         service_keys is True or\
-        default_vpc is True:
+        default_vpc is True or\
+        legacy_buckets is True:
         send_email()

@@ -14,8 +14,8 @@ if os.path.isfile(get_key()):
 
 alert = False
 
-path = os.path.join(os.path.dirname(__file__), 'logs/')
-logfile = os.path.join(path, 'google-security.log')
+path = os.path.expanduser('~/python-logs')
+logfile = os.path.expanduser('~/python-logs/security.log')
 
 if os.path.isdir(path):
     pass
