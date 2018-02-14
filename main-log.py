@@ -74,7 +74,6 @@ def get_default_service_accounts():
                                    format(serviceaccount, project))
         except KeyError:
             logger.info('0 Service Accounts found in project "{0}"'.format(project))
-            pass
 
         except:
             logger.warning('Default Service Account - Unknown error.  Please run manually')
@@ -103,7 +102,6 @@ def get_default_vpc():
 
         except KeyError:
             logger.info('0 VPCs found in project "{0}"'.format(project_name))
-            pass
 
         except:
             logger.warning('Default VPC Network - Unknown error.  Please run manually')
@@ -146,7 +144,6 @@ def get_service_account_keys():
 
         except KeyError:
             logger.info('0 Service Account keys found in project "{0}"'.format(project))
-            pass
 
         except:
             logger.warning('Service Account key - Unknown error.  Please run manually')
