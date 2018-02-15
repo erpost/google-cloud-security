@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
 
-# Logs Global Permissions of Google Cloud Platform Buckets
+# Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
@@ -42,7 +42,11 @@ for project_name in get_projects():
             for member in members:
                 if member == 'allUsers' or member == 'allAuthenticatedUsers':
                     alert = True
-                    logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
+                    logger.warning('"{0}" permissions were removed from Bucket "{1}" in project "{2}"'.
                                    format(member, bucket.name, project_name))
+                    bucket_dict[bucket.name] = project_name
+                    policy = bucket.get_iam_policy()
+                    policy[role].discard(member)
+                    bucket.set_iam_policy(policy)
 if alert is False:
     logger.info('No world-readable Bucket permissions found')
