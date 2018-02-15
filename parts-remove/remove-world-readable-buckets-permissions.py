@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
 
-# Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names
+# Removes Global Permissions from Google Cloud Platform Buckets
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
