@@ -31,7 +31,7 @@ handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
 
-def remove_world_readable_buckets():
+def remove_world_readable_bucket_permissions():
     """removes Global permissions from Google Cloud Platform Buckets"""
     alert = False
     for project_name in get_projects():
@@ -59,13 +59,41 @@ def remove_world_readable_buckets():
     return alert
 
 
+def remove_legacy_bucket_permissions():
+    """removes Legacy Bucket permissions"""
+    alert = False
+    for project_name in get_projects():
+        storage_client = storage.Client(project=project_name)
+        buckets = storage_client.list_buckets()
+
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+            for role in policy:
+                members = policy[role]
+
+                for member in members:
+                    if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
+                        alert = True
+                        logger.warning('"{0}" permissions were removed from Bucket "{1}" in project "{2}"'.
+                                       format(member, bucket.name, project_name))
+                        bucket_dict[bucket.name] = project_name
+                        policy = bucket.get_iam_policy()
+                        policy[role].discard(member)
+                        bucket.set_iam_policy(policy)
+
+    if alert is False:
+        logger.info('No Legacy Bucket permissions found')
+
+
 def send_email():
     print('Sending Removal Email...')
 
 
 if __name__ == "__main__":
 
-    world_buckets = remove_world_readable_buckets()
+    world_buckets = remove_world_readable_bucket_permissions()
+    legacy_buckets = remove_legacy_bucket_permissions()
 
-    if world_buckets is True:
+    if world_buckets is True or \
+       legacy_buckets is True:
         send_email()

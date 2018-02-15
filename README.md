@@ -6,17 +6,17 @@
     - pip3 install -r google-python-security/requirements.txt
 - Within your Google Cloud Project, create a Service Account with No Role and download JSON Key
 - Associate the GCP Service Account at the Organizational Level and give the following custom permissions:
-    - Compute Network Viewer permissions:
+    - Compute Network Role:
         - compute.networks.get
         - compute.networks.list
         - resourcemanager.projects.get
-    - Custom Service Account & Key Viewer Permissions:
+    - Custom Service Account & Key Role:
         - iam.serviceAccountKeys.get
         - iam.serviceAccountKeys.list
         - iam.serviceAccounts.get
         - iam.serviceAccounts.list
         - resourcemanager.projects.get
-    - Custom Storage Viewer:
+    - Custom Storage Role:
         - storage.buckets.get
         - storage.buckets.getIamPolicy
         - storage.buckets.list
@@ -24,6 +24,8 @@
         - storage.objects.getIamPolicy
         - storage.objects.list
         - resourcemanager.projects.get
+        - storage.buckets.setIamPolicy (only needed for remove functionality)
+        - storage.objects.setIamPolicy (only needed for remove functionality)
 - Create the directory: ~/.gcp
 - Move Service Account Key and rename file to: ~/.gcp/[key file].json
 - Clone Repo

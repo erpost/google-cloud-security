@@ -4,8 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
-
-# Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names
+# Removes Legacy Bucket Permissions
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
@@ -40,7 +39,7 @@ for project_name in get_projects():
             members = policy[role]
 
             for member in members:
-                if member == 'allUsers' or member == 'allAuthenticatedUsers':
+                if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
                     alert = True
                     logger.warning('"{0}" permissions were removed from Bucket "{1}" in project "{2}"'.
                                    format(member, bucket.name, project_name))
@@ -48,5 +47,6 @@ for project_name in get_projects():
                     policy = bucket.get_iam_policy()
                     policy[role].discard(member)
                     bucket.set_iam_policy(policy)
+
 if alert is False:
-    logger.info('No world-readable Bucket permissions found')
+    logger.info('No Legacy Bucket permissions found')
