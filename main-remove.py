@@ -86,7 +86,7 @@ def remove_legacy_bucket_permissions():
 
 
 def send_email():
-    print('Sending Removal Email...')
+    pass
 
 
 if __name__ == "__main__":
