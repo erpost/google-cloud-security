@@ -1,4 +1,4 @@
-# Scripts to check for security findings within Google Cloud Platform#
+# Security Checks for Google Cloud Platform#
 
 | Security Check | Logging Capability | Removal Capability | Additional Notes |
 |-----------------------------------|--------------------|--------------------|------------------|
