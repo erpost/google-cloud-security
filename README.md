@@ -2,7 +2,7 @@
 
 | Security Check | Logging Capability | Removal Capability | Additional Notes |
 |-----------------------------------|--------------------|--------------------|------------------|
-| World-readable Bucket Permissions | Completed | Completed | Bug Fixed |
+| World-readable Bucket Permissions | Completed | Completed | [Bug Fixed](https://github.com/GoogleCloudPlatform/google-cloud-python/issues/4682) |
 | Legacy Bucket Permissions | Completed | Completed | |
 | Default Service Accounts | Completed | In Progress | TODO: Delete Service Accounts from IAM |
 | Default VPC | Completed | N/A | "default" VPC name is not reserved |
