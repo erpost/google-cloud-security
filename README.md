@@ -1,6 +1,7 @@
-| **Security Check** | **Logging Capability** | **Removal Capability** | **Additional Notes** |
+| Security Check | Logging Capability | Removal Capability | Additional Notes |
 |-----------------------------------|--------------------|--------------------|------------------|
 | World-readable Bucket Permissions | Completed | Completed | Bug Fixed |
+| Legacy Bucket Permissions | Completed | Completed | |
 
 
 
