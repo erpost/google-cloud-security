@@ -1,4 +1,4 @@
-#Security Checks for Google Cloud Platform#
+# Security Checks for Google Cloud Platform #
 
 | Security Check | Logging Capability | Removal Capability | Additional Notes |
 |-----------------------------------|--------------------|--------------------|------------------|
