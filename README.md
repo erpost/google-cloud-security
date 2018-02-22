@@ -7,7 +7,7 @@
 | Default Service Accounts | Completed | In Progress | TODO: Delete Service Accounts from IAM |
 | Default VPC | Completed | N/A | "default" VPC name is not reserved |
 | Service Account Keys Rotation | Completed | N/A | Check currently set to 180 days |
-| Non-Standard User Accounts | In Progress | N/A | Checks for non-Organizational accounts |
+| Non-Organizational User Accounts | In Progress | N/A | Checks for non-Organizational accounts |
 
 
 - Install Python 3, virtualenv, pip and requirements (see install.sh)
