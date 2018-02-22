@@ -1,6 +1,7 @@
-| Security Check | Logging Capability | Removal Capability | Additional Notes |
+| **Security Check** | **Logging Capability** | **Removal Capability** | **Additional Notes** |
 |-----------------------------------|--------------------|--------------------|------------------|
 | World-readable Bucket Permissions | Completed | Completed | Bug Fixed |
+
 
 
 - Install Python 3, virtualenv, pip and requirements (see install.sh)
