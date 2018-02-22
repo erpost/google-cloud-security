@@ -2,6 +2,8 @@
 |-----------------------------------|--------------------|--------------------|------------------|
 | World-readable Bucket Permissions | Completed | Completed | Bug Fixed |
 | Legacy Bucket Permissions | Completed | Completed | |
+| Default Service Accounts | Completed | In Progress | TODO: Delete Service Accounts from IAM |
+| Default VPC | Completed | | "default" VPC name is not reserved |
 
 
 
