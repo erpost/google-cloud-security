@@ -6,7 +6,7 @@ from gcp import get_key, get_projects
 from pprint import pprint
 
 
-# logs User Accounts not part of GCP Organization
+# logs User Accounts not part of the specified GCP Organization
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
@@ -41,6 +41,7 @@ for project in get_projects():
     for binding in bindings:
         for member in binding['members']:
             if member.startswith('user:') and domain not in member:
+                alert = True
                 if member not in user_list:
                     logger.warning('Project "{0}" contains non-organizational "{1}"'.format(project, member))
                     user_list.append(member)
