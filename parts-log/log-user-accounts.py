@@ -12,7 +12,7 @@ if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
 
 alert = False
-domain = 'nih.gov'
+domain = '<example.com>'
 
 path = os.path.expanduser('~/python-logs')
 logfile = os.path.expanduser('~/python-logs/security.log')
@@ -46,3 +46,6 @@ for project in get_projects():
                     user_list.append(member)
                 else:
                     pass
+
+if alert is False:
+    logger.info('No non-organizational users found')
