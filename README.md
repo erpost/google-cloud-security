@@ -6,7 +6,7 @@
 | Legacy Bucket Permissions | Completed | Completed | |
 | Default Service Accounts | Completed | In Progress | TODO: Delete Service Accounts from IAM |
 | Default VPC | Completed | N/A | "default" VPC name is not reserved |
-| Service Account Keys Rotation | Completed | N/A | Check currently set to 180 days |
+| Service Account Keys Rotation | Completed | N/A | Checks for Keys older than 180 days |
 | Non-Organizational User Accounts | Completed | N/A | Checks for non-Organizational accounts in IAM |
 | Non-Organization Bucket Users | In Progess | | Checks for non-Organizational accounts on Buckets |
 
