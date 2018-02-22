@@ -12,6 +12,7 @@ if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
 
 alert = False
+domain = 'nih.gov'
 
 path = os.path.expanduser('~/python-logs')
 logfile = os.path.expanduser('~/python-logs/security.log')
@@ -30,16 +31,18 @@ handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
 for project in get_projects():
+    user_list = []
     project_name = 'projects/' + project
     service = discovery.build('cloudresourcemanager', 'v1')
     request = service.projects().getIamPolicy(resource=project, body={})
     response = request.execute()
     bindings = response['bindings']
-    print('@' * 100)
-    print(project)
-    print('@' * 100)
 
     for binding in bindings:
-        # print(binding['members'])
         for member in binding['members']:
-            print(member)
+            if member.startswith('user:') and domain not in member:
+                if member not in user_list:
+                    logger.warning('Project "{0}" contains non-organizational "{1}"'.format(project, member))
+                    user_list.append(member)
+                else:
+                    pass
