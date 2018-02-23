@@ -8,7 +8,7 @@
 | Default VPC | Completed | N/A | "default" VPC name is not reserved |
 | Service Account Keys Rotation | Completed | N/A | Checks for Keys older than 180 days |
 | Non-Organizational User Accounts | Completed | N/A | Checks for non-Organizational accounts in IAM |
-| Non-Organization Bucket Users | In Progess | | Checks for non-Organizational accounts on Buckets |
+| Non-Organizational Bucket Users | In Progess | | Checks for non-Organizational accounts on Buckets |
 
 
 - Install Python 3, virtualenv, pip and requirements (see install.sh)
