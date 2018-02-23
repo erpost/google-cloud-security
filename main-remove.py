@@ -1,9 +1,6 @@
 from google.cloud import storage
-from googleapiclient import discovery
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import os
 import logging
 
@@ -84,8 +81,11 @@ def remove_legacy_bucket_permissions():
     if alert is False:
         logger.info('No Legacy Bucket permissions found')
 
+    return alert
+
 
 def send_email():
+    """add logic for how you want to send email alerts"""
     pass
 
 

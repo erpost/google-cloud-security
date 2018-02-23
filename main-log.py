@@ -228,7 +228,7 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error('Bad credentials.  Exiting...')
         exit(1)
-    except:
+    except Exception:
         logger.error('Unknown error. Exiting...')
         exit(1)
 
