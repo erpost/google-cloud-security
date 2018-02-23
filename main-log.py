@@ -240,7 +240,7 @@ def send_email():
     try:
         server.sendmail(gmail_sender, [recipient], BODY)
         logger.info('Email sent')
-    except:
+    except Exception:
         logger.error('Error sending mail')
 
     server.quit()
