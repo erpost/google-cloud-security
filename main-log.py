@@ -5,9 +5,12 @@ from gcp import get_key, get_projects
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import os
+import smtplib
 import logging
+import credentials
 
-domain = '<example.com>'
+
+domain = credentials.get_org_domain()
 
 
 if os.path.isfile(get_key()):
@@ -209,7 +212,38 @@ def log_user_accounts():
 
 
 def send_email():
-    pass
+    """send email alert"""
+    recipient = credentials.get_recipient_email()
+    subject = 'Google Cloud Security Risks Found!'
+    body = 'Please log into your Google Account and review Security Logs.\n\n\nThank you,\nNIH Security'
+
+    # Gmail Sign In
+    gmail_sender = credentials.get_sender_email()
+    gmail_passwd = credentials.get_password()
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+        server.login(gmail_sender, gmail_passwd)
+    except smtplib.SMTPAuthenticationError:
+        logger.error('Bad credentials.  Exiting...')
+        exit(1)
+    except:
+        logger.error('Unknown error. Exiting...')
+        exit(1)
+
+    BODY = '\r\n'.join(['To: %s' % recipient,
+                        'From: %s' % gmail_sender,
+                        'Subject: %s' % subject,
+                        '', body])
+
+    try:
+        server.sendmail(gmail_sender, [recipient], BODY)
+        logger.info('Email sent')
+    except:
+        logger.error('Error sending mail')
+
+    server.quit()
 
 
 if __name__ == "__main__":
