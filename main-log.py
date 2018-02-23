@@ -7,6 +7,8 @@ from dateutil.relativedelta import relativedelta
 import os
 import logging
 
+domain = '<example.com>'
+
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
@@ -179,7 +181,7 @@ def get_legacy_bucket_permissions():
 
 
 def log_user_accounts():
-    """"""
+    """logs User Accounts not part of the specified GCP Organization"""
     alert = False
     for project in get_projects():
         user_list = []
@@ -217,10 +219,12 @@ if __name__ == "__main__":
     default_vpc = get_default_vpc()
     service_keys = get_service_account_keys()
     legacy_buckets = get_legacy_bucket_permissions()
+    user_accounts = log_user_accounts()
 
     if world_buckets is True or\
         service_accounts is True or\
         service_keys is True or\
         default_vpc is True or\
-        legacy_buckets is True:
+        legacy_buckets is True or\
+        user_accounts is True:
         send_email()
