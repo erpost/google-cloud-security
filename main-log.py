@@ -178,6 +178,34 @@ def get_legacy_bucket_permissions():
     return alert
 
 
+def log_user_accounts():
+    """"""
+    alert = False
+    for project in get_projects():
+        user_list = []
+
+        service = discovery.build('cloudresourcemanager', 'v1')
+        request = service.projects().getIamPolicy(resource=project, body={})
+        response = request.execute()
+        bindings = response['bindings']
+
+        for binding in bindings:
+            for member in binding['members']:
+                if member.startswith('user:') and domain not in member:
+                    alert = True
+                    if member not in user_list:
+                        logger.warning('Project "{0}" contains non-organizational account "{1}"'.format(project, member))
+                        user_list.append(member)
+                    else:
+                        pass
+
+    if alert is False:
+        logger.info('No non-organizational users found')
+
+    return alert
+
+
+
 def send_email():
     pass
 

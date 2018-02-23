@@ -3,7 +3,6 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
-from pprint import pprint
 
 
 # logs User Accounts not part of the specified GCP Organization
@@ -32,7 +31,6 @@ logger.addHandler(handler)
 
 for project in get_projects():
     user_list = []
-    project_name = 'projects/' + project
     service = discovery.build('cloudresourcemanager', 'v1')
     request = service.projects().getIamPolicy(resource=project, body={})
     response = request.execute()
@@ -43,7 +41,7 @@ for project in get_projects():
             if member.startswith('user:') and domain not in member:
                 alert = True
                 if member not in user_list:
-                    logger.warning('Project "{0}" contains non-organizational "{1}"'.format(project, member))
+                    logger.warning('Project "{0}" contains non-organizational account "{1}"'.format(project, member))
                     user_list.append(member)
                 else:
                     pass
