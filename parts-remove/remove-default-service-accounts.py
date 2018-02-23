@@ -4,7 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
-"""removes all Service Accounts from the Service Account page and logs"""
+# removes all Service Accounts from the Service Account page and logs
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
