@@ -8,7 +8,7 @@
 | Default VPC | Completed | N/A | "default" VPC name is not reserved |
 | Service Account Keys Rotation | Completed | N/A | Checks for Keys older than 180 days |
 | Non-Organizational User Accounts | Completed | N/A | Checks for non-Organizational accounts in IAM |
-| Non-Organizational Bucket Users | In Progress | | Checks for non-Organizational accounts on Buckets |
+| Non-Organizational Bucket Users | Completed | | Checks for non-Organizational accounts on Buckets |
 | Data Access Logs Enabled | TBD | N/A | Checks that [Data Access](https://cloud.google.com/logging/docs/audit/configure-data-access) Logs are enabled |
 
 
