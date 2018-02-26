@@ -210,6 +210,31 @@ def log_user_accounts():
     return alert
 
 
+def log_user_accounts_buckets():
+    """logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization"""
+    alert = False
+
+    for project_name in get_projects():
+        storage_client = storage.Client(project=project_name)
+        buckets = storage_client.list_buckets()
+
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+
+            for role in policy:
+                members = policy[role]
+
+                for member in members:
+                    if member.startswith('user:') and domain not in member:
+                        alert = True
+                        logger.warning('Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
+                                       format(bucket.name, project_name, member))
+
+    if alert is False:
+        logger.info('No non-organizational accounts found on buckets')
+
+    return alert
+
 
 def send_email():
     """send email alert"""
@@ -254,11 +279,13 @@ if __name__ == "__main__":
     service_keys = get_service_account_keys()
     legacy_buckets = get_legacy_bucket_permissions()
     user_accounts = log_user_accounts()
+    user_account_buckets = log_user_accounts_buckets()
 
     if world_buckets is True or\
         service_accounts is True or\
         service_keys is True or\
         default_vpc is True or\
         legacy_buckets is True or\
-        user_accounts is True:
+        user_accounts is True or\
+        user_account_buckets is True:
         send_email()
