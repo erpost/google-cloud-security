@@ -39,5 +39,5 @@
 - Create the directory: ~/.gcp
 - Move Service Account Key and rename file to: ~/.gcp/[key file].json
 - Clone Repo
-- Modify credentials_template.py, add requested information and rename file to credentials.py
+- Modify credentials_template.py, add requested information and rename to credentials.py
 - Modify gcp.py and add Service Account Key name to get_function()
