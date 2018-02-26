@@ -4,6 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
+
 # Logs Legacy Bucket Permissions
 
 if os.path.isfile(get_key()):
