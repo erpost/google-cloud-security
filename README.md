@@ -38,6 +38,6 @@
     - storage.buckets.setIamPolicy (only needed for removal functionality)
     - storage.objects.setIamPolicy (only needed for removal functionality)
 - Create the directory: ~/.gcp
-- Move Service Account Key and rename file to: ~/.gcp/[key file].json
+- Move Service Account Key and rename file to: ~/.gcp/cloudsecurity-monitoring.json
 - Clone Repo
 - Modify credentials_template.py, add requested information and rename to credentials.py- Modify gcp.py and add Service Account Key name to get_function()
