@@ -12,7 +12,7 @@
 | Data Access Logs Enabled | TBD | N/A | Checks that [Data Access](https://cloud.google.com/logging/docs/audit/configure-data-access) Logs are enabled |
 
 
-- Install Python 3, virtualenv, pip and requirements (see install.sh)
+- Install Python 3, virtualenv, pip and requirements (see install_python.sh)
 - Create Virtualenv and install requirements (run the commands below)
     - cd ~
     - virtualenv venv --python=python3.4
@@ -39,4 +39,5 @@
 - Create the directory: ~/.gcp
 - Move Service Account Key and rename file to: ~/.gcp/[key file].json
 - Clone Repo
+- Modify credentials_template.py, add requested information and rename file to credentials.py
 - Modify gcp.py and add Service Account Key name to get_function()
