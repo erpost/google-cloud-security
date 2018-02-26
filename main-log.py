@@ -64,12 +64,12 @@ def get_default_service_accounts():
     alert = False
     for project in get_projects():
         project_name = 'projects/' + project
-        service = discovery.build('iam', 'v1')
-        request = service.projects().serviceAccounts().list(name=project_name)
-        response = request.execute()
-
         try:
+            service = discovery.build('iam', 'v1')
+            request = service.projects().serviceAccounts().list(name=project_name)
+            response = request.execute()
             accounts = response['accounts']
+
             for account in accounts:
                 serviceaccount = account['email']
 
@@ -93,12 +93,12 @@ def get_default_vpc():
     """logs Default VPCs"""
     alert = False
     for project_name in get_projects():
-        service = discovery.build('compute', 'v1')
-        request = service.networks().list(project=project_name)
-        response = request.execute()
-
         try:
+            service = discovery.build('compute', 'v1')
+            request = service.networks().list(project=project_name)
+            response = request.execute()
             items = response['items']
+
             for item in items:
                 vpc = item['name']
 
@@ -124,12 +124,12 @@ def get_service_account_keys():
 
     for project in get_projects():
         project_name = 'projects/' + project
-        service = discovery.build('iam', 'v1')
-        request = service.projects().serviceAccounts().list(name=project_name)
-        response = request.execute()
-
         try:
+            service = discovery.build('iam', 'v1')
+            request = service.projects().serviceAccounts().list(name=project_name)
+            response = request.execute()
             accounts = response['accounts']
+
             for account in accounts:
                 serviceaccount = project_name + '/serviceAccounts/' + account['email']
                 request = service.projects().serviceAccounts().keys().list(name=serviceaccount)
@@ -189,12 +189,10 @@ def log_user_accounts():
     alert = False
     for project in get_projects():
         user_list = []
-
-        service = discovery.build('cloudresourcemanager', 'v1')
-        request = service.projects().getIamPolicy(resource=project, body={})
-        response = request.execute()
-
         try:
+            service = discovery.build('cloudresourcemanager', 'v1')
+            request = service.projects().getIamPolicy(resource=project, body={})
+            response = request.execute()
             bindings = response['bindings']
 
             for binding in bindings:
