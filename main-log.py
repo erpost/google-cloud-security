@@ -260,8 +260,9 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error('Bad credentials.  Exiting...')
         exit(1)
-    except Exception:
+    except Exception as e:
         logger.error('Gmail - Unknown error. Exiting...')
+        print(e)
         exit(1)
 
     BODY = '\r\n'.join(['To: %s' % recipient,
