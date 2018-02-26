@@ -96,6 +96,7 @@ def get_default_vpc():
         service = discovery.build('compute', 'v1')
         request = service.networks().list(project=project_name)
         response = request.execute()
+
         try:
             items = response['items']
             for item in items:
@@ -192,17 +193,25 @@ def log_user_accounts():
         service = discovery.build('cloudresourcemanager', 'v1')
         request = service.projects().getIamPolicy(resource=project, body={})
         response = request.execute()
-        bindings = response['bindings']
 
-        for binding in bindings:
-            for member in binding['members']:
-                if member.startswith('user:') and domain not in member:
-                    alert = True
-                    if member not in user_list:
-                        logger.warning('Project "{0}" contains non-organizational account "{1}"'.format(project, member))
-                        user_list.append(member)
-                    else:
-                        pass
+        try:
+            bindings = response['bindings']
+
+            for binding in bindings:
+                for member in binding['members']:
+                    if member.startswith('user:') and domain not in member:
+                        alert = True
+                        if member not in user_list:
+                            logger.warning('Project "{0}" contains non-organizational account "{1}"'.format(project, member))
+                            user_list.append(member)
+                        else:
+                            pass
+
+        except KeyError:
+            logger.info('0 User Accounts found in project "{0}"'.format(project))
+
+        except Exception:
+            logger.error('Non-Organizational User Accounts - Unknown error.  Please run manually')
 
     if alert is False:
         logger.info('No non-organizational users found')
@@ -254,7 +263,7 @@ def send_email():
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception:
-        logger.error('Unknown error. Exiting...')
+        logger.error('Gmail - Unknown error. Exiting...')
         exit(1)
 
     BODY = '\r\n'.join(['To: %s' % recipient,
