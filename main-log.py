@@ -215,7 +215,7 @@ def send_email():
     """send email alert"""
     recipient = credentials.get_recipient_email()
     subject = 'Google Cloud Security Risks Found!'
-    body = 'Please log into your Google Account and review Security Logs.\n\n\nThank you,\nNIH Security'
+    body = 'Please log into your Google Account and review Security Logs.\n\n\nThank you,\nSecurity'
 
     # Gmail Sign In
     gmail_sender = credentials.get_sender_email()
