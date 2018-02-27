@@ -15,7 +15,7 @@
 - Install Python 3, virtualenv, pip and requirements (see install_python.sh)
 - Create Virtualenv and install requirements (run the commands below)
     - cd ~
-    - virtualenv venv --python=python3.4
+    - virtualenv venv --python=python3
     - source venv/bin/activate
     - pip3 install -r google-python-security/requirements.txt
 - Within your Google Cloud Project, create a Service Account with No Role and download JSON Key
