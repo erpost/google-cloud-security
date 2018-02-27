@@ -245,6 +245,7 @@ def log_user_accounts_buckets():
 
 def send_email():
     """send email alert"""
+    logger.info('Sending email')
     recipient = credentials.get_recipient_email()
     subject = 'Google Cloud Security Risks Found!'
     body = 'Please log into your Google Account and review Security Logs.\n\n\nThank you,\nSecurity'
@@ -261,8 +262,7 @@ def send_email():
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as e:
-        logger.error('Gmail - Unknown error. Exiting...')
-        print(e)
+        logger.error('Gmail error: ' + e)
         exit(1)
 
     BODY = '\r\n'.join(['To: %s' % recipient,
