@@ -262,7 +262,7 @@ def send_email():
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as e:
-        logger.error('Gmail error: ' + e)
+        logger.error('Gmail error: ' + e['OSError'])
         exit(1)
 
     BODY = '\r\n'.join(['To: %s' % recipient,
