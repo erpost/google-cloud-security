@@ -110,7 +110,7 @@ def get_default_vpc():
             logger.info('0 VPCs found in project "{0}"'.format(project_name))
 
         except Exception:
-            logger.error('Default VPC Network - Unknown error.  Please run manually')
+            logger.error('Default VPC Network - Unknown error in project "{0}".  Please run manually'.format(project_name))
 
     if alert is False:
         logger.info('No Default VPCs found')
@@ -262,7 +262,8 @@ def send_email():
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as e:
-        logger.error('Gmail error: ' + e['OSError'])
+        # logger.error('Gmail error: ' + e['OSError'])
+        logger.error('Gmail error.  Exxiting')
         exit(1)
 
     BODY = '\r\n'.join(['To: %s' % recipient,
