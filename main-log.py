@@ -140,7 +140,8 @@ def get_non_us_vpc_subnets():
                         if 'us-' not in subnet:
                             alert = True
                             logger.warning(
-                                '| Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.format(subnet, vpc, project))
+                                '| Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.format(subnet, vpc,
+                                                                                                   project))
 
         except KeyError:
             logger.info('| 0 VPCs found in project "{0}"'.format(project))
@@ -236,7 +237,8 @@ def get_user_accounts():
                     if member.startswith('user:') and domain not in member:
                         alert = True
                         if member not in user_list:
-                            logger.warning('| Project "{0}" contains non-organizational account "{1}"'.format(project, member))
+                            logger.warning('| Project "{0}" contains non-organizational account "{1}"'.format(project,
+                                                                                                              member))
                             user_list.append(member)
                         else:
                             pass
@@ -297,7 +299,7 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error('| Bad credentials.  Exiting...')
         exit(1)
-    except Exception as e:
+    except Exception:x
         logger.error('| Gmail unknown error.  Exiting...')
         exit(1)
 
