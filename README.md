@@ -5,7 +5,8 @@
 | World-readable Bucket Permissions | Completed | Completed | [Bug Fixed](https://github.com/GoogleCloudPlatform/google-cloud-python/issues/4682) |
 | Legacy Bucket Permissions | Completed | Completed | |
 | Default Service Accounts | Completed | Completed | TODO: Add Deletion of Service Accounts from IAM and replace len() with try/except |
-| Default VPC | Completed | N/A | TODO: Modify to log on any VPC with Automatic Subnet Mode |
+| Default VPC | Completed | N/A | TODO: Add check for Automatic Subnet Mode within "default" VPC|
+| Non-US Subnets in VPC | Completed | N/A | Checks for any Subnets not in the U.S. |
 | Service Account Keys Rotation | Completed | N/A | Checks for Keys older than 180 days |
 | Non-Organizational User Accounts | Completed | N/A | Checks for non-Organizational accounts in IAM |
 | Non-Organizational Bucket Users | Completed | | Checks for non-Organizational accounts on Buckets |
