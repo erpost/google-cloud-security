@@ -102,8 +102,9 @@ def get_default_vpc():
 
             for item in items:
                 vpc = item['name']
+                autocreate = item['autoCreateSubnetworks']
 
-                if vpc == 'default':
+                if vpc == 'default' and autocreate is True:
                     alert = True
                     logger.warning('| Default VPC Network "{0}" found in project "{1}"'.format(vpc, project_name))
 
@@ -299,7 +300,7 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error('| Bad credentials.  Exiting...')
         exit(1)
-    except Exception:x
+    except Exception:
         logger.error('| Gmail unknown error.  Exiting...')
         exit(1)
 

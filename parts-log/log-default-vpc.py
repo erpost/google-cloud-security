@@ -4,6 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
+
 # logs all Default VPC Networks
 
 if os.path.isfile(get_key()):
@@ -36,8 +37,9 @@ for project_name in get_projects():
         items = response['items']
         for item in items:
             vpc = item['name']
+            autocreate = item['autoCreateSubnetworks']
 
-            if vpc == 'default':
+            if vpc == 'default' and autocreate is True:
                 alert = True
                 logger.warning('Default VPC Network "{0}" found in project "{1}"'.format(vpc, project_name))
     except KeyError:
