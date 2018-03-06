@@ -11,6 +11,7 @@
 | Non-Organizational Bucket Users | Completed | | Checks for non-Organizational accounts on Buckets |
 | Data Access Logs Enabled | TBD | N/A | Checks that [Data Access](https://cloud.google.com/logging/docs/audit/configure-data-access) Logs are enabled |
 
+**How to use the script(s):**
 
 - Install Python 3, virtualenv, pip and requirements (see install_python.sh)
 - Create Virtualenv and install requirements (run the commands below)
