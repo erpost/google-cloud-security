@@ -6,6 +6,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import os
 import smtplib
+import re
 import logging
 import credentials
 
@@ -118,6 +119,41 @@ def get_default_vpc():
     return alert
 
 
+def get_non_us_vpc_subnets():
+    """logs all non-US Subnets"""
+    alert = False
+    for project in get_projects():
+        service = discovery.build('compute', 'v1')
+        request = service.networks().list(project=project)
+        response = request.execute()
+        try:
+            items = response['items']
+
+            for item in items:
+                vpc = item['name']
+                subnetworks = item['subnetworks']
+
+                for subnetwork in subnetworks:
+                    subnets = re.findall('regions/(.*)/subnetworks', subnetwork)
+
+                    for subnet in subnets:
+                        if 'us-' not in subnet:
+                            alert = True
+                            logger.warning(
+                                '| Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.format(subnet, vpc, project))
+
+        except KeyError:
+            logger.info('| 0 VPCs found in project "{0}"'.format(project))
+
+        except Exception:
+            logger.error('| Non-US subnets - Unknown error.  Please run manually')
+
+    if alert is False:
+        logger.info('| No non-US subnets found')
+
+    return alert
+
+
 def get_service_account_keys():
     """logs all Service Accounts Keys that are older than 180 days"""
     alert = False
@@ -184,7 +220,7 @@ def get_legacy_bucket_permissions():
     return alert
 
 
-def log_user_accounts():
+def get_user_accounts():
     """logs User Accounts not part of the specified GCP Organization"""
     alert = False
     for project in get_projects():
@@ -217,7 +253,7 @@ def log_user_accounts():
     return alert
 
 
-def log_user_accounts_buckets():
+def get_user_accounts_buckets():
     """logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization"""
     alert = False
 
@@ -265,13 +301,13 @@ def send_email():
         logger.error('| Gmail unknown error.  Exiting...')
         exit(1)
 
-    BODY = '\r\n'.join(['To: %s' % recipient,
+    body = '\r\n'.join(['To: %s' % recipient,
                         'From: %s' % gmail_sender,
                         'Subject: %s' % subject,
                         '', body])
 
     try:
-        server.sendmail(gmail_sender, [recipient], BODY)
+        server.sendmail(gmail_sender, [recipient], body)
         logger.info('| Email sent')
     except Exception:
         logger.error('| Error sending mail')
@@ -284,15 +320,17 @@ if __name__ == "__main__":
     world_buckets = get_world_readable_buckets()
     service_accounts = get_default_service_accounts()
     default_vpc = get_default_vpc()
+    non_us_subnets = get_non_us_vpc_subnets()
     service_keys = get_service_account_keys()
     legacy_buckets = get_legacy_bucket_permissions()
-    user_accounts = log_user_accounts()
-    user_account_buckets = log_user_accounts_buckets()
+    user_accounts = get_user_accounts()
+    user_account_buckets = get_user_accounts_buckets()
 
     if world_buckets is True or\
         service_accounts is True or\
         service_keys is True or\
         default_vpc is True or\
+        non_us_subnets is True or\
         legacy_buckets is True or\
         user_accounts is True or\
         user_account_buckets is True:
