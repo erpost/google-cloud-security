@@ -124,10 +124,10 @@ def get_non_us_vpc_subnets():
     """logs all non-US Subnets"""
     alert = False
     for project in get_projects():
-        service = discovery.build('compute', 'v1')
-        request = service.networks().list(project=project)
-        response = request.execute()
         try:
+            service = discovery.build('compute', 'v1')
+            request = service.networks().list(project=project)
+            response = request.execute()
             items = response['items']
 
             for item in items:

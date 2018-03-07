@@ -31,10 +31,10 @@ logger.addHandler(handler)
 
 
 for project in get_projects():
-    service = discovery.build('compute', 'v1')
-    request = service.networks().list(project=project)
-    response = request.execute()
     try:
+        service = discovery.build('compute', 'v1')
+        request = service.networks().list(project=project)
+        response = request.execute()
         items = response['items']
 
         for item in items:
