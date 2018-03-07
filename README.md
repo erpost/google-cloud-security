@@ -2,7 +2,7 @@
 
 | Security Check | Logging Capability | Removal Capability | Additional Notes |
 |-----------------------------------|--------------------|--------------------|------------------|
-| World-readable Bucket Permissions | Completed | Completed | [Bug Fixed](https://github.com/GoogleCloudPlatform/google-cloud-python/issues/4682) Checks for buckets with AllUsers or AllAuthenticatedUsers groups |
+| World-readable Bucket Permissions | Completed | Completed | [\*Bug Fixed\*](https://github.com/GoogleCloudPlatform/google-cloud-python/issues/4682) Checks for buckets with AllUsers or AllAuthenticatedUsers groups |
 | Legacy Bucket Permissions | Completed | Completed | |
 | Default Service Accounts | Completed | Completed | TODO: Add Deletion of Service Accounts from IAM and replace len() with try/except |
 | Default VPC | Completed | N/A | Checks for VPC named "default" that has Automatic Subnet Mode enabled |
