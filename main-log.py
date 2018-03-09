@@ -14,7 +14,6 @@ import credentials
 
 domain = credentials.get_org_domain()
 
-
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
 
