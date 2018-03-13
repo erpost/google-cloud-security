@@ -42,6 +42,7 @@ for project in get_projects():
                 if 'requireSsl' not in item['settings']['ipConfiguration']:
                     logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
                                    format(db_name, project))
+                    alert = True
                 else:
                     ssl = item['settings']['ipConfiguration']['requireSsl']
                     logger.info('Database "{0}" in Project "{1}" SSL is set to: "{2}".'.
@@ -59,3 +60,6 @@ for project in get_projects():
 
     except Exception:
         logger.error('Cloud SQL SSL Connections - Unknown error in project "{0}". Please run manually'.format(project))
+
+if alert is False:
+    logger.info('| No Cloud SQL found without SSL Connections enforced')

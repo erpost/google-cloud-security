@@ -1,5 +1,6 @@
 from google.cloud import storage
 from googleapiclient import discovery
+from googleapiclient.errors import HttpError
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 from datetime import datetime
@@ -282,6 +283,47 @@ def get_user_accounts_buckets():
     return alert
 
 
+def get_sql_unsecure_connections():
+    """logs all Cloud SQL Databases without enforced SSL Connections"""
+    alert = False
+    for project in get_projects():
+        try:
+            service = discovery.build('sqladmin', 'v1beta4')
+            request = service.instances().list(project=project)
+            response = request.execute()
+
+            if 'items' in response:
+                items = response['items']
+                for item in items:
+                    db_name = item['name']
+                    if 'requireSsl' not in item['settings']['ipConfiguration']:
+                        logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
+                                       format(db_name, project))
+                    else:
+                        ssl = item['settings']['ipConfiguration']['requireSsl']
+                        logger.info('Database "{0}" in Project "{1}" SSL is set to: "{2}".'.
+                                    format(db_name, project, ssl))
+
+            else:
+                logger.info('0 Databases in Project "{0}"'.format(project))
+
+        except HttpError as he:
+            if he.resp.status == 403:
+                logger.error('Cloud SQL SSL Connections - Permissions issue on Project "{0}"'.format(project))
+            else:
+                logger.error('Cloud SQL SSL Connections - HTTP Error: "{0}" on Project "{1}"'.
+                             format(he.resp.status, project))
+
+        except Exception:
+            logger.error(
+                'Cloud SQL SSL Connections - Unknown error in project "{0}". Please run manually'.format(project))
+
+    if alert is False:
+        logger.info('| No Cloud SQL found without SSL Connections enforced')
+
+    return alert
+
+
 def send_email():
     """send email alert"""
     logger.info('| Sending email')
@@ -328,6 +370,7 @@ if __name__ == "__main__":
     legacy_buckets = get_legacy_bucket_permissions()
     user_accounts = get_user_accounts()
     user_account_buckets = get_user_accounts_buckets()
+    sql_unsecure_connections = get_sql_unsecure_connections()
 
     if world_buckets is True or\
         service_accounts is True or\
@@ -336,5 +379,6 @@ if __name__ == "__main__":
         non_us_subnets is True or\
         legacy_buckets is True or\
         user_accounts is True or\
-        user_account_buckets is True:
+        user_account_buckets is True or \
+        sql_unsecure_connections is True:
         send_email()
