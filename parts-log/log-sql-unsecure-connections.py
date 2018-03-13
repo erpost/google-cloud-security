@@ -48,9 +48,11 @@ for project in get_projects():
             logger.info('0 Databases in Project "{0}"'.format(project))
 
     except HttpError as he:
-            logger.error('Unsecure SQL Connections Error: "{0}" on Project "{1}"'.format(he.resp.status, project))
-
+        if he.resp.status == 403:
+            logger.error('Cloud SQL SSL Connections - Permissions issue on Project "{0}"'.format(project))
+        else:
+            logger.error('Cloud SQL SSL Connections - HTTP Error: "{0}" on Project "{1}"'.
+                         format(he.resp.status, project))
 
     except Exception:
-        logger.error('Cloud SQL Unsecure Connections - Unknown error in project "{0}".  '
-                     'Please run manually'.format(project))
+        logger.error('Cloud SQL SSL Connections - Unknown error in project "{0}". Please run manually'.format(project))
