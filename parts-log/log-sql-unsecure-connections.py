@@ -38,13 +38,11 @@ for project in get_projects():
         if 'items' in response:
             items = response['items']
             for item in items:
-
+                db_name = item['name']
                 if 'requireSsl' not in item['settings']['ipConfiguration']:
-                    db_name = item['name']
                     logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
                                    format(db_name, project))
                 else:
-                    db_name = item['name']
                     ssl = item['settings']['ipConfiguration']['requireSsl']
                     logger.info('Database "{0}" in Project "{1}" SSL is set to: "{2}".'.
                                 format(db_name, project, ssl))

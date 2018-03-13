@@ -22,6 +22,12 @@
     - pip3 install -r google-python-security/requirements.txt
 - Within your Google Cloud Project, create a Service Account with No Role and download JSON Key
 - Associate the GCP Service Account at the Organizational Level and give the following custom permissions:
+    - cloudsql.databases.get
+    - cloudsql.databases.list
+    - cloudsql.instances.get
+    - cloudsql.instances.list
+    - cloudsql.sslCerts.get
+    - cloudsql.sslCerts.list
     - compute.networks.get
     - compute.networks.list
     - iam.serviceAccountKeys.get
