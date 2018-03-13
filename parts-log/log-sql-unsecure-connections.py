@@ -43,6 +43,11 @@ for project in get_projects():
                     db_name = item['name']
                     logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
                                    format(db_name, project))
+                else:
+                    db_name = item['name']
+                    ssl = item['settings']['ipConfiguration']['requireSsl']
+                    logger.info('Database "{0}" in Project "{1}" SSL is set to: "{2}".'.
+                                format(db_name, project, ssl))
 
         else:
             logger.info('0 Databases in Project "{0}"'.format(project))
