@@ -30,8 +30,6 @@ handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
 for project in get_projects():
-    print(project)
-
     try:
         service = discovery.build('sqladmin', 'v1beta4')
         request = service.instances().list(project=project)
@@ -50,8 +48,8 @@ for project in get_projects():
             logger.info('0 Databases in Project "{0}"'.format(project))
 
     except HttpError as he:
-        if he.resp.status == 403:
-            logger.error('Access Denied.  Check Cloud SQL Permissions on Project "{0}"'.format(project))
+            logger.error('Unsecure SQL Connections Error: "{0}" on Project "{1}"'.format(he.resp.status, project))
+
 
     except Exception:
         logger.error('Cloud SQL Unsecure Connections - Unknown error in project "{0}".  '
