@@ -2,7 +2,10 @@ from google.cloud import storage
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+from google.api_core.exceptions import ClientError
 from gcp import get_key, get_projects
+
+from pprint import pprint
 
 
 # logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization
@@ -30,21 +33,29 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
-for project_name in get_projects():
-    storage_client = storage.Client(project=project_name)
-    buckets = storage_client.list_buckets()
+for project in get_projects():
+    try:
+        storage_client = storage.Client(project=project)
+        buckets = storage_client.list_buckets()
 
-    for bucket in buckets:
-        policy = bucket.get_iam_policy()
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
 
-        for role in policy:
-            members = policy[role]
+            for role in policy:
+                members = policy[role]
 
-            for member in members:
-                if member.startswith('user:') and domain not in member:
-                    alert = True
-                    logger.warning('Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
-                                   format(bucket.name, project_name, member))
+                for member in members:
+                    if member.startswith('user:') and domain not in member:
+                        alert = True
+                        logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
+                                       format(bucket.name, project, member))
+    except ClientError as ce:
+        logger.error('Non-Organizational Accounts on Buckets: {0}'.
+                     format(ce))
+
+    except Exception:
+        logger.error('Non-Organizational Accounts on Buckets - Unknown error in project "{0}". Please run manually'.
+            format(project))
 
 if alert is False:
-    logger.info('No non-organizational accounts found on buckets')
+    logger.info(' No non-organizational accounts found on buckets')
