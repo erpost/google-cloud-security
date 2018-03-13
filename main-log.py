@@ -299,6 +299,7 @@ def get_sql_unsecure_connections():
                     if 'requireSsl' not in item['settings']['ipConfiguration']:
                         logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
                                        format(db_name, project))
+                        alert = True
                     else:
                         ssl = item['settings']['ipConfiguration']['requireSsl']
                         logger.info('Database "{0}" in Project "{1}" SSL is set to: "{2}".'.
