@@ -344,7 +344,7 @@ def get_sql_unsecure_connections():
 
 def send_email():
     """send email alert"""
-    logger.info(' Sending email')
+    logger.info('Sending email')
     recipient = credentials.get_recipient_email()
     subject = 'Google Cloud Security Risks Found!'
     body = 'Please log into your Google Account and review Security Logs.\n\n\nThank you,\nSecurity'
@@ -358,7 +358,7 @@ def send_email():
         server.starttls()
         server.login(gmail_sender, gmail_passwd)
     except smtplib.SMTPAuthenticationError:
-        logger.error(' Bad credentials.  Exiting...')
+        logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as err:
         logger.error('Gmail error: '.format(err))
