@@ -1,6 +1,7 @@
 from google.cloud import storage
 from googleapiclient import discovery
 from logging.handlers import RotatingFileHandler
+from tempfile import TemporaryFile
 from gcp import get_key, get_projects
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -19,6 +20,7 @@ if os.path.isfile(get_key()):
 
 bucket_dict = {}
 bckts = []
+findings = TemporaryFile()
 
 path = os.path.expanduser('~/python-logs')
 logfile = os.path.expanduser('~/python-logs/security.log')
@@ -40,6 +42,7 @@ logger.addHandler(handler)
 def get_world_readable_buckets():
     """logs world-readable buckets with AllUsers or AllAuthenticatedUsers permissions"""
     alert = False
+    world_bucket_total = []
 
     logger.info('-----Checking for world-readable bucket permissions-----')
     for project in get_projects():
@@ -55,6 +58,8 @@ def get_world_readable_buckets():
                     for member in members:
                         if member == 'allUsers' or member == 'allAuthenticatedUsers':
                             alert = True
+                            if bucket.name not in world_bucket_total:
+                                world_bucket_total.append(bucket.name)
                             logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
                                            format(member, bucket.name, project))
 
@@ -64,12 +69,16 @@ def get_world_readable_buckets():
     if alert is False:
         logger.info('No world-readable Bucket permissions found')
 
+    data = '{0} buckets have world-readable permissions\n'.format(len(world_bucket_total))
+    findings.write(bytes(data, 'UTF-8'))
+
     return alert
 
 
 def get_default_service_accounts():
     """logs Default Service Accounts found in IAM > Service Accounts"""
     alert = False
+    service_account_total = 0
 
     logger.info('-----Checking for default Service Accounts-----')
     for project in get_projects():
@@ -85,6 +94,7 @@ def get_default_service_accounts():
 
                 if 'gserviceaccount.com' in serviceaccount and 'iam' not in serviceaccount:
                     alert = True
+                    service_account_total += 1
                     logger.warning(' Default Service Account "{0}" found in project "{1}"'.
                                    format(serviceaccount, project))
         except KeyError:
@@ -95,6 +105,9 @@ def get_default_service_accounts():
 
     if alert is False:
         logger.info('No Default Service Accounts found')
+
+    data = '{0} default service accounts\n'.format(service_account_total)
+    findings.write(bytes(data, 'UTF-8'))
 
     return alert
 
@@ -400,3 +413,5 @@ if __name__ == "__main__":
         user_account_buckets is True or \
         sql_unsecure_connections is True:
         send_email()
+        findings.seek(0)
+        print(findings.read().decode())
