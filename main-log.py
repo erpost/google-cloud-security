@@ -1,6 +1,5 @@
 from google.cloud import storage
 from googleapiclient import discovery
-from google.api_core.exceptions import ClientError
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 from datetime import datetime
@@ -41,11 +40,13 @@ logger.addHandler(handler)
 def get_world_readable_buckets():
     """logs world-readable buckets with AllUsers or AllAuthenticatedUsers permissions"""
     alert = False
-    try:
-        for project in get_projects():
-            storage_client = storage.Client(project=project)
-            buckets = storage_client.list_buckets()
 
+    logger.info('-----Checking for world-readable bucket permissions-----')
+    for project in get_projects():
+        storage_client = storage.Client(project=project)
+        buckets = storage_client.list_buckets()
+
+        try:
             for bucket in buckets:
                 policy = bucket.get_iam_policy()
                 for role in policy:
@@ -54,13 +55,11 @@ def get_world_readable_buckets():
                     for member in members:
                         if member == 'allUsers' or member == 'allAuthenticatedUsers':
                             alert = True
-                            logger.warning(' "{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
+                            logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
                                            format(member, bucket.name, project))
-    except ClientError as ce:
-        logger.error('World Readable Buckets: {0}'.format(ce))
 
-    except Exception:
-        logger.error('World Readable Buckets - Unknown error in project "{0}". Please run manually'.format(project))
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
         logger.info('No world-readable Bucket permissions found')
@@ -259,8 +258,8 @@ def get_user_accounts():
                     if member.startswith('user:') and domain not in member:
                         alert = True
                         if member not in user_list:
-                            logger.warning(' Project "{0}" contains non-organizational account "{1}"'.format(project,
-                                                                                                              member))
+                            logger.warning(' Project "{0}" contains non-organizational account "{1}"'.
+                                           format(project, member))
                             user_list.append(member)
                         else:
                             pass
