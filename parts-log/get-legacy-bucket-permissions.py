@@ -30,19 +30,24 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
-for project_name in get_projects():
-    storage_client = storage.Client(project=project_name)
+logger.info('-----Checking for legacy bucket permissions-----')
+for project in get_projects():
+    storage_client = storage.Client(project=project)
     buckets = storage_client.list_buckets()
 
-    for bucket in buckets:
-        policy = bucket.get_iam_policy()
-        for role in policy:
-            members = policy[role]
+    try:
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+            for role in policy:
+                members = policy[role]
 
-            for member in members:
-                if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
-                    alert = True
-                    logger.warning('"{0}" permission for member "{1}" applied to Bucket "{2}"'
-                                   ' in project "{3}"'.format(role, member, bucket.name, project_name))
+                for member in members:
+                    if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
+                        alert = True
+                        logger.warning('"{0}" permission for member "{1}" applied to Bucket "{2}"'
+                                       ' in project "{3}"'.format(role, member, bucket.name, project))
+    except Exception as err:
+        logger.info(err)
+
 if alert is False:
     logger.info('No Legacy Bucket permissions found')

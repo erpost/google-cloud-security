@@ -30,19 +30,25 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
-for project_name in get_projects():
-    storage_client = storage.Client(project=project_name)
+logger.info('-----Checking for world-readable bucket permissions-----')
+for project in get_projects():
+    storage_client = storage.Client(project=project)
     buckets = storage_client.list_buckets()
 
-    for bucket in buckets:
-        policy = bucket.get_iam_policy()
-        for role in policy:
-            members = policy[role]
+    try:
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+            for role in policy:
+                members = policy[role]
 
-            for member in members:
-                if member == 'allUsers' or member == 'allAuthenticatedUsers':
-                    alert = True
-                    logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
-                                   format(member, bucket.name, project_name))
+                for member in members:
+                    if member == 'allUsers' or member == 'allAuthenticatedUsers':
+                        alert = True
+                        logger.warning('"{0}" permissions found applied to Bucket "{1}" in project "{2}"'.
+                                       format(member, bucket.name, project))
+
+    except Exception as err:
+        logger.error(err)
+
 if alert is False:
     logger.info('No world-readable Bucket permissions found')

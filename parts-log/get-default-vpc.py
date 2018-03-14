@@ -5,13 +5,12 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
 
-# logs User Accounts not part of the specified GCP Organization
+# logs all Default VPC Networks
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
 
 alert = False
-domain = '<example.com>'
 
 path = os.path.expanduser('~/python-logs')
 logfile = os.path.expanduser('~/python-logs/security.log')
@@ -29,22 +28,27 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+logger.info('-----Checking for default VPCs-----')
 for project in get_projects():
-    user_list = []
-    service = discovery.build('cloudresourcemanager', 'v1')
-    request = service.projects().getIamPolicy(resource=project, body={})
-    response = request.execute()
-    bindings = response['bindings']
+    try:
+        service = discovery.build('compute', 'v1')
+        request = service.networks().list(project=project)
+        response = request.execute()
+        items = response['items']
 
-    for binding in bindings:
-        for member in binding['members']:
-            if member.startswith('user:') and domain not in member:
+        for item in items:
+            vpc = item['name']
+            autocreate = item['autoCreateSubnetworks']
+
+            if vpc == 'default' and autocreate is True:
                 alert = True
-                if member not in user_list:
-                    logger.warning('Project "{0}" contains non-organizational account "{1}"'.format(project, member))
-                    user_list.append(member)
-                else:
-                    pass
+                logger.warning(' Default VPC Network "{0}" found in project "{1}"'.format(vpc, project))
+
+    except KeyError:
+        logger.info('No VPCs found in project "{0}"'.format(project))
+
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
-    logger.info('No non-organizational users found')
+    logger.info('No Default VPCs found')

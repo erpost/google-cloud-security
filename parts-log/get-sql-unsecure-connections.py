@@ -29,6 +29,7 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+logger.info('-----Checking for SQL unsecure connections-----')
 for project in get_projects():
     try:
         service = discovery.build('sqladmin', 'v1beta4')
@@ -51,15 +52,8 @@ for project in get_projects():
         else:
             logger.info('0 Databases in Project "{0}"'.format(project))
 
-    except HttpError as he:
-        if he.resp.status == 403:
-            logger.error('Cloud SQL SSL Connections - Permissions issue on Project "{0}"'.format(project))
-        else:
-            logger.error('Cloud SQL SSL Connections - HTTP Error: "{0}" on Project "{1}"'.
-                         format(he.resp.status, project))
-
-    except Exception:
-        logger.error('Cloud SQL SSL Connections - Unknown error in project "{0}". Please run manually'.format(project))
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
-    logger.info('| No Cloud SQL found without SSL Connections enforced')
+    logger.info(' No Cloud SQL found without SSL Connections enforced')

@@ -29,7 +29,7 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
-
+logger.info('-----Checking for non-US VPC subnets-----')
 for project in get_projects():
     try:
         service = discovery.build('compute', 'v1')
@@ -47,13 +47,14 @@ for project in get_projects():
                 for subnet in subnets:
                     if 'us-' not in subnet:
                         alert = True
-                        logger.warning('| Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.format(subnet, vpc, project))
+                        logger.warning('Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.
+                                       format(subnet, vpc, project))
 
     except KeyError:
-        logger.info('| 0 VPCs found in project "{0}"'.format(project))
+        logger.info('No VPCs found in project "{0}"'.format(project))
 
-    except Exception:
-        logger.error('| Non-US subnets - Unknown error.  Please run manually')
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
-    logger.info('| No non-US subnets found')
+    logger.info(' No non-US subnets found')

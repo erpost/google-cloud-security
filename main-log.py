@@ -1,6 +1,5 @@
 from google.cloud import storage
 from googleapiclient import discovery
-from googleapiclient.errors import HttpError
 from google.api_core.exceptions import ClientError
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
@@ -64,7 +63,7 @@ def get_world_readable_buckets():
         logger.error('World Readable Buckets - Unknown error in project "{0}". Please run manually'.format(project))
 
     if alert is False:
-        logger.info(' No world-readable Bucket permissions found')
+        logger.info('No world-readable Bucket permissions found')
 
     return alert
 
@@ -72,6 +71,8 @@ def get_world_readable_buckets():
 def get_default_service_accounts():
     """logs Default Service Accounts found in IAM > Service Accounts"""
     alert = False
+
+    logger.info('-----Checking for default Service Accounts-----')
     for project in get_projects():
         project_name = 'projects/' + project
         try:
@@ -88,13 +89,13 @@ def get_default_service_accounts():
                     logger.warning(' Default Service Account "{0}" found in project "{1}"'.
                                    format(serviceaccount, project))
         except KeyError:
-            logger.info(' 0 Service Accounts found in project "{0}"'.format(project))
+            logger.info('No Service Accounts found in project "{0}"'.format(project))
 
-        except Exception:
-            logger.error(' Default Service Account - Unknown error.  Please run manually')
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
-        logger.info(' No Default Service Accounts found')
+        logger.info('No Default Service Accounts found')
 
     return alert
 
@@ -102,6 +103,8 @@ def get_default_service_accounts():
 def get_default_vpc():
     """logs Default VPCs"""
     alert = False
+
+    logger.info('-----Checking for default VPCs-----')
     for project in get_projects():
         try:
             service = discovery.build('compute', 'v1')
@@ -118,13 +121,13 @@ def get_default_vpc():
                     logger.warning(' Default VPC Network "{0}" found in project "{1}"'.format(vpc, project))
 
         except KeyError:
-            logger.info(' 0 VPCs found in project "{0}"'.format(project))
+            logger.info('No VPCs found in project "{0}"'.format(project))
 
-        except Exception:
-            logger.error(' Default VPC Network - Unknown error in project "{0}".  Please run manually'.format(project))
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
-        logger.info(' No Default VPCs found')
+        logger.info('No Default VPCs found')
 
     return alert
 
@@ -132,6 +135,8 @@ def get_default_vpc():
 def get_non_us_vpc_subnets():
     """logs all non-US Subnets"""
     alert = False
+
+    logger.info('-----Checking for non-US VPC subnets-----')
     for project in get_projects():
         try:
             service = discovery.build('compute', 'v1')
@@ -149,15 +154,14 @@ def get_non_us_vpc_subnets():
                     for subnet in subnets:
                         if 'us-' not in subnet:
                             alert = True
-                            logger.warning(
-                                ' Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.format(subnet, vpc,
-                                                                                                   project))
+                            logger.warning('Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.
+                                           format(subnet, vpc, project))
 
         except KeyError:
-            logger.info(' 0 VPCs found in project "{0}"'.format(project))
+            logger.info('No VPCs found in project "{0}"'.format(project))
 
-        except Exception:
-            logger.error(' Non-US subnets - Unknown error.  Please run manually')
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
         logger.info(' No non-US subnets found')
@@ -169,6 +173,7 @@ def get_service_account_keys():
     """logs all Service Accounts Keys that are older than 180 days"""
     alert = False
 
+    logger.info('-----Checking Service Account Key age-----')
     for project in get_projects():
         project_name = 'projects/' + project
         try:
@@ -189,17 +194,17 @@ def get_service_account_keys():
                     enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
                     key_age_years = relativedelta(enddate, startdate).years
 
-                    if key_age_years > 0:
+                    if key_age_years > 180:
                         key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                        if key_age_days > 90:
+                        if key_age_days > 1:
                             alert = True
-                            logger.warning(' Service Account key is older than 180 days: {0}'.format(keyname))
+                            logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
 
         except KeyError:
-            logger.info(' 0 Service Account keys found in project "{0}"'.format(project))
+            logger.info('No Service Accounts found in project "{0}"'.format(project))
 
-        except Exception:
-            logger.error(' Service Account key - Unknown error.  Please run manually')
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
         logger.info(' No Service Account Keys older than 180 days found')
@@ -210,11 +215,13 @@ def get_service_account_keys():
 def get_legacy_bucket_permissions():
     """logs all buckets containing legacy permissions"""
     alert = False
-    try:
-        for project in get_projects():
-            storage_client = storage.Client(project=project)
-            buckets = storage_client.list_buckets()
 
+    logger.info('-----Checking for legacy bucket permissions-----')
+    for project in get_projects():
+        storage_client = storage.Client(project=project)
+        buckets = storage_client.list_buckets()
+
+        try:
             for bucket in buckets:
                 policy = bucket.get_iam_policy()
                 for role in policy:
@@ -223,17 +230,13 @@ def get_legacy_bucket_permissions():
                     for member in members:
                         if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
                             alert = True
-                            logger.warning(' "{0}" permission for member "{1}" applied to Bucket "{2}"'
+                            logger.warning('"{0}" permission for member "{1}" applied to Bucket "{2}"'
                                            ' in project "{3}"'.format(role, member, bucket.name, project))
-
-    except ClientError as ce:
-        logger.error('Legacy Permissions on Buckets: {0}'.format(ce))
-
-    except Exception:
-        logger.error('Legacy Permissions on Buckets - Unknown error in project "{0}". Please run manually'.format(project))
+        except Exception as err:
+            logger.info(err)
 
     if alert is False:
-        logger.info(' No Legacy Bucket permissions found')
+        logger.info('No Legacy Bucket permissions found')
 
     return alert
 
@@ -241,6 +244,8 @@ def get_legacy_bucket_permissions():
 def get_user_accounts():
     """logs User Accounts not part of the specified GCP Organization"""
     alert = False
+
+    logger.info('-----Checking for non-organizational accounts in IAM-----')
     for project in get_projects():
         user_list = []
         try:
@@ -260,14 +265,14 @@ def get_user_accounts():
                         else:
                             pass
 
-        except KeyError:
-            logger.info(' 0 User Accounts found in project "{0}"'.format(project))
+        except KeyError as err:
+            logger.info('No User Accounts found in project "{0}": {1}'.format(project, err))
 
-        except Exception:
-            logger.error(' Non-Organizational User Accounts - Unknown error.  Please run manually')
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
-        logger.info(' No non-organizational users found')
+        logger.info('No non-organizational users found')
 
     return alert
 
@@ -275,6 +280,7 @@ def get_user_accounts():
 def get_user_accounts_buckets():
     """logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization"""
     alert = False
+    logger.info('-----Checking for non-organizational accounts on buckets-----')
     for project in get_projects():
         try:
             storage_client = storage.Client(project=project)
@@ -291,16 +297,12 @@ def get_user_accounts_buckets():
                             alert = True
                             logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
                                            format(bucket.name, project, member))
-        except ClientError as ce:
-            logger.error('Non-Organizational Accounts on Buckets: {0}'.
-                         format(ce))
 
-        except Exception:
-            logger.error('Non-Organizational Accounts on Buckets - Unknown error in project "{0}". Please run manually'.
-                         format(project))
+        except Exception as err:
+            logger.error('Error: {0}'.format(err))
 
     if alert is False:
-        logger.info(' No non-organizational accounts found on buckets')
+        logger.info('No non-organizational accounts found on buckets')
 
     return alert
 
@@ -308,6 +310,8 @@ def get_user_accounts_buckets():
 def get_sql_unsecure_connections():
     """logs all Cloud SQL Databases without enforced SSL Connections"""
     alert = False
+
+    logger.info('-----Checking for SQL unsecure connections-----')
     for project in get_projects():
         try:
             service = discovery.build('sqladmin', 'v1beta4')
@@ -330,16 +334,8 @@ def get_sql_unsecure_connections():
             else:
                 logger.info('0 Databases in Project "{0}"'.format(project))
 
-        except HttpError as he:
-            if he.resp.status == 403:
-                logger.error('Cloud SQL SSL Connections - Permissions issue on Project "{0}"'.format(project))
-            else:
-                logger.error('Cloud SQL SSL Connections - HTTP Error: "{0}" on Project "{1}"'.
-                             format(he.resp.status, project))
-
-        except Exception:
-            logger.error(
-                'Cloud SQL SSL Connections - Unknown error in project "{0}". Please run manually'.format(project))
+        except Exception as err:
+            logger.error(err)
 
     if alert is False:
         logger.info(' No Cloud SQL found without SSL Connections enforced')
@@ -365,8 +361,8 @@ def send_email():
     except smtplib.SMTPAuthenticationError:
         logger.error(' Bad credentials.  Exiting...')
         exit(1)
-    except Exception:
-        logger.error('Gmail unknown error.  Exiting...')
+    except Exception as err:
+        logger.error('Gmail error: '.format(err))
         exit(1)
 
     body = '\r\n'.join(['To: %s' % recipient,
@@ -377,8 +373,8 @@ def send_email():
     try:
         server.sendmail(gmail_sender, [recipient], body)
         logger.info('Email sent')
-    except Exception:
-        logger.error('Error sending mail')
+    except Exception as err:
+        logger.error('Error sending mail: '.format(err))
 
     server.quit()
 

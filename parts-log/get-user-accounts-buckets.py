@@ -33,6 +33,7 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+logger.info('-----Checking for non-organizational accounts on buckets-----')
 for project in get_projects():
     try:
         storage_client = storage.Client(project=project)
@@ -49,13 +50,9 @@ for project in get_projects():
                         alert = True
                         logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
                                        format(bucket.name, project, member))
-    except ClientError as ce:
-        logger.error('Non-Organizational Accounts on Buckets: {0}'.
-                     format(ce))
 
-    except Exception:
-        logger.error('Non-Organizational Accounts on Buckets - Unknown error in project "{0}". Please run manually'.
-            format(project))
+    except Exception as err:
+        logger.error('Error: {0}'.format(err))
 
 if alert is False:
-    logger.info(' No non-organizational accounts found on buckets')
+    logger.info('No non-organizational accounts found on buckets')

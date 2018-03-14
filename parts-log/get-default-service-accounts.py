@@ -27,13 +27,13 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+logger.info('-----Checking for default Service Accounts-----')
 for project in get_projects():
     project_name = 'projects/' + project
-    service = discovery.build('iam', 'v1')
-    request = service.projects().serviceAccounts().list(name=project_name)
-    response = request.execute()
-
     try:
+        service = discovery.build('iam', 'v1')
+        request = service.projects().serviceAccounts().list(name=project_name)
+        response = request.execute()
         accounts = response['accounts']
 
         for account in accounts:
@@ -41,13 +41,13 @@ for project in get_projects():
 
             if 'gserviceaccount.com' in serviceaccount and 'iam' not in serviceaccount:
                 alert = True
-                logger.warning('Default Service Account "{0}" found in project "{1}"'.
+                logger.warning(' Default Service Account "{0}" found in project "{1}"'.
                                format(serviceaccount, project))
     except KeyError:
-        logger.info('0 Service Accounts available in project "{0}"'.format(project))
+        logger.info('No Service Accounts found in project "{0}"'.format(project))
 
-    except Exception:
-        logger.error('Default Service Account - Unknown Error!  Please run manually')
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
     logger.info('No Default Service Accounts found')

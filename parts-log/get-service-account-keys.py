@@ -30,14 +30,15 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+logger.info('-----Checking Service Account Key age-----')
 for project in get_projects():
     project_name = 'projects/' + project
-    service = discovery.build('iam', 'v1')
-    request = service.projects().serviceAccounts().list(name=project_name)
-    response = request.execute()
-
     try:
+        service = discovery.build('iam', 'v1')
+        request = service.projects().serviceAccounts().list(name=project_name)
+        response = request.execute()
         accounts = response['accounts']
+
         for account in accounts:
             serviceaccount = project_name + '/serviceAccounts/' + account['email']
             request = service.projects().serviceAccounts().keys().list(name=serviceaccount)
@@ -50,16 +51,17 @@ for project in get_projects():
                 enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
                 key_age_years = relativedelta(enddate, startdate).years
 
-                if key_age_years > 0:
+                if key_age_years > 180:
                     key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                    if key_age_days > 90:
+                    if key_age_days > 1:
                         alert = True
-                        logger.warning('Service Account key is older than 90 days: {0}'.format(keyname))
-    except KeyError:
-        logger.info('0 Service Account keys found in project "{0}"'.format(project))
+                        logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
 
-    except Exception:
-        logger.error('Service Account key - Unknown error.  Please run manually')
+    except KeyError:
+        logger.info('No Service Accounts found in project "{0}"'.format(project))
+
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
-    logger.info('No Service Account Keys older than 90 days found')
+    logger.info(' No Service Account Keys older than 180 days found')
