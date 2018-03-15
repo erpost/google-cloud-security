@@ -481,10 +481,10 @@ def get_sql_unsecure_connections():
         logger.info(' No Cloud SQL found without SSL Connections enforced')
 
     # write to tempfile
-    if sql_unsecure_connection_total == 0:
+    if sql_unsecure_connection_errors == 0:
         data = '- Unsecure SQL Connections:\t\t{:>4}\n'.format(sql_unsecure_connection_total)
 
-    elif sql_unsecure_connection_total == 1:
+    elif sql_unsecure_connection_errors == 1:
         data = '- Unsecure SQL Connections:\t\t{:>4}  [{} error found]\n'.format(sql_unsecure_connection_total,
                                                                                  sql_unsecure_connection_errors)
     else:
