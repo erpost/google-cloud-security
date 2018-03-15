@@ -12,6 +12,7 @@
 | Non-Organizational Bucket Users | Completed | N/A | Checks for non-Organizational accounts on Buckets |
 | Cloud SQL not Enforced | Completed | N/A | Checks for Cloud SQL Instances that don't have SSL Encryption required |
 | Cloud SQL Authorized Networks Allowed | TBD | N/A | Checks for Cloud SQL Instances that have IPs Whitelisted |
+| Cloud SQL User Accounts | TBD | | |
 | Data Access Logs Enabled | TBD | N/A | Checks that [Data Access](https://cloud.google.com/logging/docs/audit/configure-data-access) Logs are enabled |
 
 **How to install Python 3 and use the script(s):**
