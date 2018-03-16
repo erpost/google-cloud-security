@@ -525,33 +525,26 @@ def send_email(body):
         server.sendmail(gmail_sender, [recipient], body)
         logger.info('Email sent!')
     except Exception as err:
-        logger.error('Error sending mail: '.format(err))
+        logger.error('Sending mail failure: '.format(err))
 
     server.quit()
 
 
 if __name__ == "__main__":
 
-    world_buckets = get_world_readable_buckets()
-    legacy_buckets = get_legacy_bucket_permissions()
-    service_accounts = get_default_service_accounts()
-    default_vpc = get_default_vpc()
-    non_us_subnets = get_non_us_vpc_subnets()
-    service_keys = get_service_account_keys()
-    user_accounts = get_user_accounts()
-    user_account_buckets = get_user_accounts_buckets()
-    sql_unsecure_connections = get_sql_unsecure_connections()
+    # run all security checks
+    get_world_readable_buckets()
+    get_legacy_bucket_permissions()
+    get_default_service_accounts()
+    get_default_vpc()
+    get_non_us_vpc_subnets()
+    get_service_account_keys()
+    get_user_accounts()
+    get_user_accounts_buckets()
+    get_sql_unsecure_connections()
 
-    if world_buckets is True or \
-        legacy_buckets is True or \
-        service_accounts is True or\
-        service_keys is True or\
-        default_vpc is True or\
-        non_us_subnets is True or\
-        user_accounts is True or\
-        user_account_buckets is True or \
-        sql_unsecure_connections is True:
-
-        findings.seek(0)
-        email_body = findings.read().decode()
-        send_email(email_body)
+    # write tempfile to email body
+    findings.seek(0)
+    email_body = findings.read().decode()
+    send_email(email_body)
+    findings.close()

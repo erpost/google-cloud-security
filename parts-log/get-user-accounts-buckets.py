@@ -2,10 +2,7 @@ from google.cloud import storage
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from google.api_core.exceptions import ClientError
 from gcp import get_key, get_projects
-
-from pprint import pprint
 
 
 # logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization

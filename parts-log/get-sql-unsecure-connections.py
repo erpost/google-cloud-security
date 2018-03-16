@@ -2,7 +2,6 @@ from googleapiclient import discovery
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from googleapiclient.errors import HttpError
 from gcp import get_key, get_projects
 
 
