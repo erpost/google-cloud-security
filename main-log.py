@@ -21,7 +21,8 @@ if os.path.isfile(get_key()):
 
 # open tempfile
 findings = TemporaryFile()
-opener = 'Hello, \n\nBelow are your current GCP findings:\n\n\n'
+opener = 'Hello, \n\nBelow are the high-level findings for Google Cloud. ' \
+         'Check logs for specific findings and errors.\n\n\n'
 findings.write(bytes(opener, 'UTF-8'))
 
 # set logging path
