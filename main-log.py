@@ -75,15 +75,9 @@ def get_world_readable_buckets():
         logger.info('No world-readable Bucket permissions found')
 
     # write to tempfile
-    if world_bucket_errors == 0:
-        data = '- World-Readable Buckets:\t\t{:>4}\n'.format(len(world_bucket_total))
+    term = 'World-Readable Buckets:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(world_bucket_total), world_bucket_errors)
 
-    elif world_bucket_errors == 1:
-        data = '- World-Readable Buckets:\t\t{:>4}  [{} error found]\n'.format(len(world_bucket_total),
-                                                                               world_bucket_errors)
-    else:
-        data = '- World-Readable Buckets:\t\t{:>4}  [{} errors found]\n'.format(len(world_bucket_total),
-                                                                                world_bucket_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -121,15 +115,9 @@ def get_legacy_bucket_permissions():
         logger.info('No Legacy Bucket permissions found')
 
     # write to tempfile
-    if legacy_bucket_errors == 0:
-        data = '- Legacy Permission Buckets:\t\t{:>4}\n'.format(len(legacy_bucket_total))
+    term = 'Legacy Permission Buckets:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(legacy_bucket_total), legacy_bucket_errors)
 
-    elif legacy_bucket_errors == 1:
-        data = '- Legacy Permission Buckets:\t\t{:>4}  [{} error found]\n'.format(len(legacy_bucket_total),
-                                                                                  legacy_bucket_errors)
-    else:
-        data = '- Legacy Permission Buckets:\t\t{:>4}  [{} errors found]\n'.format(len(legacy_bucket_total),
-                                                                                   legacy_bucket_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -169,15 +157,9 @@ def get_default_service_accounts():
         logger.info('No Default Service Accounts found')
 
     # write to tempfile
-    if service_account_errors == 0:
-        data = '- Default Service Accounts:\t\t{:>4}\n'.format(service_account_total)
+    term = 'Default Service Accounts:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, service_account_total, service_account_errors)
 
-    elif service_account_errors == 1:
-        data = '- Default Service Accounts:\t\t{:>4}  [{} error found]\n'.format(service_account_total,
-                                                                                 service_account_errors)
-    else:
-        data = '- Default Service Accounts:\t\t{:>4}  [{} errors found]\n'.format(service_account_total,
-                                                                                  service_account_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -217,14 +199,8 @@ def get_default_vpc():
         logger.info('No Default VPCs found')
 
     # write to tempfile
-    if default_vpc_errors == 0:
-        data = '- Default VPCs:\t\t\t\t{:>4}\n'.format(default_vpc_total)
-
-    elif default_vpc_errors == 1:
-        data = '- Default VPCs:\t\t\t\t{:>4}  [{} error found]\n'.format(default_vpc_total, default_vpc_errors)
-
-    else:
-        data = '- Default VPCs:\t\t\t\t{:>4}  [{} errors found]\n'.format(default_vpc_total, default_vpc_errors)
+    term = 'Default VPCs:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, default_vpc_total, default_vpc_errors)
 
     findings.write(bytes(data, 'UTF-8'))
 
@@ -270,15 +246,9 @@ def get_non_us_vpc_subnets():
         logger.info(' No non-US subnets found')
 
     # write to tempfile
-    if non_us_vpc_subnets_errors == 0:
-        data = '- Non-US Subnets:\t\t\t{:>4}\n'.format(non_us_vpc_subnets_total)
-
-    elif non_us_vpc_subnets_errors == 1:
-        data = '- Non-US Subnets:\t\t\t{:>4}  [{} error found]\n'.format(non_us_vpc_subnets_total,
-                                                                         non_us_vpc_subnets_errors)
-    else:
-        data = '- Non-US Subnets:\t\t\t{:>4}  [{} errors found]\n'.format(non_us_vpc_subnets_total,
-                                                                          non_us_vpc_subnets_errors)
+    term = 'Non-US Subnets:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, non_us_vpc_subnets_total,
+                                                                   non_us_vpc_subnets_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -329,15 +299,9 @@ def get_service_account_keys():
         logger.info(' No Service Account Keys older than 180 days found')
 
     # write to tempfile
-    if service_account_keys_errors == 0:
-        data = '- Service Account Keys > 180 days:\t{:>4}\n'.format(service_account_keys_total)
-
-    elif service_account_keys_errors == 1:
-        data = '- Service Account Keys > 180 days:\t{:>4}  [{} error found]\n'.format(service_account_keys_total,
-                                                                                      service_account_keys_errors)
-    else:
-        data = '- Service Account Keys > 180 days:\t{:>4}  [{} errors found]\n'.format(service_account_keys_total,
-                                                                                       service_account_keys_errors)
+    term = 'Service Account Keys > 180 days:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, service_account_keys_total,
+                                                                   service_account_keys_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -381,16 +345,9 @@ def get_user_accounts():
         logger.info('No non-organizational users found')
 
     # write to tempfile
-    if user_account_errors == 0:
-        data = '- Non-Organizational Accounts:\t\t{:>4}\n'.format(user_account_total)
+    term = 'Non-Organizational Accounts:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_total, user_account_errors)
 
-    elif user_account_errors == 1:
-        data = '- Non-Organizational Accounts:\t\t{:>4}  [{} error found]\n'.format(user_account_total,
-                                                                                    user_account_errors)
-
-    else:
-        data = '- Non-Organizational Accounts:\t\t{:>4}  [{} errors found]\n'.format(user_account_total,
-                                                                                     user_account_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -429,15 +386,9 @@ def get_user_accounts_buckets():
         logger.info('No non-organizational accounts found on buckets')
 
     # write to tempfile
-    if user_account_bucket_errors == 0:
-        data = '- Non-Organizational Bucket Accounts:\t{:>4}\n'.format(user_account_bucket_total)
-
-    elif user_account_bucket_errors == 1:
-        data = '- Non-Organizational Bucket Accounts:\t{:>4}  [{} error found]\n'.format(user_account_bucket_total,
-                                                                                         user_account_bucket_errors)
-    else:
-        data = '- Non-Organizational Bucket Accounts:\t{:>4}  [{} errors found]\n'.format(user_account_bucket_total,
-                                                                                          user_account_bucket_errors)
+    term = 'Non-Organizational Bucket Accounts:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_bucket_total,
+                                                                   user_account_bucket_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -481,15 +432,10 @@ def get_sql_unsecure_connections():
         logger.info(' No Cloud SQL found without SSL Connections enforced')
 
     # write to tempfile
-    if sql_unsecure_connection_errors == 0:
-        data = '- Unsecure SQL Connections:\t\t{:>4}\n'.format(sql_unsecure_connection_total)
+    term = 'Unsecure SQL Connection:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_unsecure_connection_total,
+                                                                   sql_unsecure_connection_errors)
 
-    elif sql_unsecure_connection_errors == 1:
-        data = '- Unsecure SQL Connections:\t\t{:>4}  [{} error found]\n'.format(sql_unsecure_connection_total,
-                                                                                 sql_unsecure_connection_errors)
-    else:
-        data = '- Unsecure SQL Connections:\t\t{:>4}  [{} errors found]\n'.format(sql_unsecure_connection_total,
-                                                                                  sql_unsecure_connection_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -513,7 +459,7 @@ def send_email(body):
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as err:
-        logger.error('Gmail error: '.format(err))
+        logger.error('Gmail failure: '.format(err))
         exit(1)
 
     body = '\r\n'.join(['To: %s' % recipient,
@@ -543,7 +489,7 @@ if __name__ == "__main__":
     get_user_accounts_buckets()
     get_sql_unsecure_connections()
 
-    # write tempfile to email body
+    # write tempfile to email body and delete
     findings.seek(0)
     email_body = findings.read().decode()
     send_email(email_body)
