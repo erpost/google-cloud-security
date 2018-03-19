@@ -55,4 +55,4 @@ for project in get_projects():
         logger.error(err)
 
 if alert is False:
-    logger.info(' No Cloud SQL found without SSL Connections enforced')
+    logger.info('No Cloud SQL found without SSL Connections enforced')

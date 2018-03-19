@@ -41,11 +41,9 @@ for project in get_projects():
                 db_name = item['name']
                 auth_nets = item['settings']['ipConfiguration']['authorizedNetworks']
                 if auth_nets:
-                    print('This is insecure!!!')
                     logger.warning('Database "{0}" in Project "{1}" has Authorized Networks enabled'.
                                    format(db_name, project))
                     alert = True
-
                 else:
                     logger.info('Database "{0}" in Project "{1}" has no Authorized Networks'.
                                 format(db_name, project))
@@ -57,4 +55,4 @@ for project in get_projects():
         logger.error(err)
 
 if alert is False:
-    logger.info(' No Cloud SQL Authorized Networks found')
+    logger.info('No Cloud SQL Authorized Networks found')
