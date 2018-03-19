@@ -460,7 +460,7 @@ def send_email(body):
         logger.error('Bad credentials.  Exiting...')
         exit(1)
     except Exception as err:
-        logger.error('Gmail failure: '.format(err))
+        logger.error('Gmail failure: {0}'.format(err))
         exit(1)
 
     body = '\r\n'.join(['To: %s' % recipient,
@@ -472,7 +472,7 @@ def send_email(body):
         server.sendmail(gmail_sender, [recipient], body)
         logger.info('Email sent!')
     except Exception as err:
-        logger.error('Sending mail failure: '.format(err))
+        logger.error('Sending mail failure: {0}'.format(err))
 
     server.quit()
 
