@@ -76,7 +76,7 @@ def get_world_readable_buckets():
         logger.info('No world-readable Bucket permissions found')
 
     # write to tempfile
-    term = 'World-Readable Buckets:'
+    term = 'Buckets with World-Readable Permissions:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(world_bucket_total), world_bucket_errors)
 
     findings.write(bytes(data, 'UTF-8'))
@@ -116,7 +116,7 @@ def get_legacy_bucket_permissions():
         logger.info('No Legacy Bucket permissions found')
 
     # write to tempfile
-    term = 'Legacy Permission Buckets:'
+    term = 'Buckets with Legacy Permissions:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(legacy_bucket_total), legacy_bucket_errors)
 
     findings.write(bytes(data, 'UTF-8'))
@@ -244,7 +244,7 @@ def get_non_us_vpc_subnets():
             logger.error(err)
 
     if alert is False:
-        logger.info(' No non-US subnets found')
+        logger.info('No non-US subnets found')
 
     # write to tempfile
     term = 'Non-US Subnets:'
@@ -300,7 +300,7 @@ def get_service_account_keys():
         logger.info(' No Service Account Keys older than 180 days found')
 
     # write to tempfile
-    term = 'Service Account Keys > 180 days:'
+    term = 'Service Account Keys Older than 180 days:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, service_account_keys_total,
                                                                    service_account_keys_errors)
     findings.write(bytes(data, 'UTF-8'))
@@ -346,7 +346,7 @@ def get_user_accounts():
         logger.info('No non-organizational users found')
 
     # write to tempfile
-    term = 'Non-Organizational Accounts:'
+    term = 'Non-Organizational Accounts in IAM:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_total, user_account_errors)
 
     findings.write(bytes(data, 'UTF-8'))
@@ -387,7 +387,7 @@ def get_user_accounts_buckets():
         logger.info('No non-organizational accounts found on buckets')
 
     # write to tempfile
-    term = 'Non-Organizational Bucket Accounts:'
+    term = 'Non-Organizational Accounts with permissions on Buckets:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_bucket_total,
                                                                    user_account_bucket_errors)
     findings.write(bytes(data, 'UTF-8'))
@@ -433,7 +433,7 @@ def get_sql_unsecure_connections():
         logger.info(' No Cloud SQL found without SSL Connections enforced')
 
     # write to tempfile
-    term = 'Unsecure SQL Connection:'
+    term = 'Cloud SQL Databases with No Enforced SSL:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_unsecure_connection_total,
                                                                    sql_unsecure_connection_errors)
     findings.write(bytes(data, 'UTF-8'))
@@ -481,13 +481,13 @@ def get_sql_auth_networks():
     if alert is False:
         logger.info('No Cloud SQL Authorized Networks found')
 
-        # write to tempfile
-        term = 'Cloud SQL Instances with Authorized Networks'
-        data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_auth_networks_total,
-                                                                       sql_auth_networks_errors)
-        findings.write(bytes(data, 'UTF-8'))
+    # write to tempfile
+    term = 'Cloud SQL Databases with Authorized Networks'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_auth_networks_total,
+                                                                   sql_auth_networks_errors)
+    findings.write(bytes(data, 'UTF-8'))
 
-        return alert
+    return alert
 
 
 def send_email(body):
