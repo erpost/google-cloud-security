@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
 
 
-# Logs all Cloud SQL Databases without enforced SSL Connections
+# Logs all Cloud SQL Databases with Authorized Networks
 
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
@@ -41,8 +41,10 @@ for project in get_projects():
                 db_name = item['name']
                 auth_nets = item['settings']['ipConfiguration']['authorizedNetworks']
                 if auth_nets:
-                    logger.warning('Database "{0}" in Project "{1}" has Authorized Networks enabled'.
-                                   format(db_name, project))
+                    for auth_net in auth_nets:
+                        nets = auth_net['value']
+                        logger.warning('Database "{0}" in Project "{1}" has Authorized Networks: {2}'.
+                                       format(db_name, project, nets))
                     alert = True
                 else:
                     logger.info('Database "{0}" in Project "{1}" has no Authorized Networks'.

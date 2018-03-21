@@ -436,10 +436,58 @@ def get_sql_unsecure_connections():
     term = 'Unsecure SQL Connection:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_unsecure_connection_total,
                                                                    sql_unsecure_connection_errors)
-
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
+
+
+def get_sql_auth_networks():
+    """logs all Cloud SQL Databases with Authorized Networks"""
+    alert = False
+    sql_auth_networks_total = 0
+    sql_auth_networks_errors = 0
+
+    logger.info('-----Checking for SQL unsecure connections-----')
+    for project in get_projects():
+        try:
+            service = discovery.build('sqladmin', 'v1beta4')
+            request = service.instances().list(project=project)
+            response = request.execute()
+
+            if 'items' in response:
+                items = response['items']
+                for item in items:
+                    db_name = item['name']
+                    auth_nets = item['settings']['ipConfiguration']['authorizedNetworks']
+                    if auth_nets:
+                        alert = True
+                        sql_auth_networks_total += 1
+                        for auth_net in auth_nets:
+                            nets = auth_net['value']
+                            logger.warning('Database "{0}" in Project "{1}" has Authorized Networks: {2}'.
+                                           format(db_name, project, nets))
+                        alert = True
+                    else:
+                        logger.info('Database "{0}" in Project "{1}" has no Authorized Networks'.
+                                    format(db_name, project))
+
+            else:
+                logger.info('0 Databases in Project "{0}"'.format(project))
+
+        except Exception as err:
+            sql_auth_networks_errors += 1
+            logger.error(err)
+
+    if alert is False:
+        logger.info('No Cloud SQL Authorized Networks found')
+
+        # write to tempfile
+        term = 'Cloud SQL Instances with Authorized Networks'
+        data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_auth_networks_total,
+                                                                       sql_auth_networks_errors)
+        findings.write(bytes(data, 'UTF-8'))
+
+        return alert
 
 
 def send_email(body):
@@ -489,6 +537,7 @@ if __name__ == "__main__":
     get_user_accounts()
     get_user_accounts_buckets()
     get_sql_unsecure_connections()
+    get_sql_auth_networks()
 
     # write tempfile to email body and delete
     findings.seek(0)
