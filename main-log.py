@@ -482,7 +482,7 @@ def get_sql_auth_networks():
         logger.info('No Cloud SQL Authorized Networks found')
 
     # write to tempfile
-    term = 'Cloud SQL Databases with Authorized Networks'
+    term = 'Cloud SQL Databases with Authorized Networks:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_auth_networks_total,
                                                                    sql_auth_networks_errors)
     findings.write(bytes(data, 'UTF-8'))
