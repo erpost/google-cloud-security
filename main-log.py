@@ -12,7 +12,9 @@ import re
 import logging
 import credentials
 
-# set organization domain (e.g "example.com")
+
+# set variables
+sql_version = 'SECOND_GEN'
 domain = credentials.get_org_domain()
 
 # set GCP key
@@ -493,7 +495,6 @@ def get_sql_auth_networks():
 def get_sql_version():
     """logs all Cloud SQL Database Users"""
     alert = False
-    sql_version = 'SECOND_GEN'
     sql_version_total = 0
     sql_version_errors = 0
 
