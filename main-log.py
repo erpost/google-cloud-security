@@ -490,6 +490,54 @@ def get_sql_auth_networks():
     return alert
 
 
+def get_sql_version():
+    """logs all Cloud SQL Database Users"""
+    alert = False
+    sql_version = 'SECOND_GEN'
+    sql_version_total = 0
+    sql_version_errors = 0
+
+    logger.info('-----Checking SQL versions-----')
+    for project in get_projects():
+        try:
+            service = discovery.build('sqladmin', 'v1beta4')
+            request = service.instances().list(project=project)
+            response = request.execute()
+
+            if 'items' in response:
+                items = response['items']
+                for item in items:
+                    db_name = item['name']
+                    db_ver = item['backendType']
+
+                    if db_ver != sql_version:
+                        alert = True
+                        sql_version_total += 1
+                        logger.warning('Database "{0}" in Project "{1}" is version: {2}'.
+                                       format(db_name, project, db_ver))
+                        alert = True
+                    else:
+                        logger.info('Database "{0}" in Project "{1}" is version: {2}'.
+                                    format(db_name, project, db_ver))
+
+            else:
+                logger.info('0 Databases in Project "{0}"'.format(project))
+
+        except Exception as err:
+            sql_version_errors += 1
+            logger.error(err)
+
+    if alert is False:
+        logger.info('No non-2nd Generation Cloud SQL Versions found')
+
+    # write to tempfile
+    term = 'Cloud SQL Versions not equal to 2nd Generation:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_version_total, sql_version_errors)
+    findings.write(bytes(data, 'UTF-8'))
+
+    return alert
+
+
 def send_email(body):
     """send email alert"""
     logger.info('Sending email')
@@ -538,6 +586,7 @@ if __name__ == "__main__":
     get_user_accounts_buckets()
     get_sql_unsecure_connections()
     get_sql_auth_networks()
+    get_sql_version()
 
     # write tempfile to email body and delete
     findings.seek(0)
