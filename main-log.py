@@ -618,5 +618,4 @@ if __name__ == "__main__":
     findings.seek(0)
     email_body = findings.read().decode()
     send_email(email_body)
-    print(email_body)
     findings.close()
