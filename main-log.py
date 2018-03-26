@@ -204,10 +204,12 @@ def get_service_account_keys():
                     key_age_years = relativedelta(enddate, startdate).years
 
                     if key_age_years > 1:
+                        total_keys += 1
                         key_age_days = datetime.now().timetuple().tm_yday - startdate.timetuple().tm_yday
 
                         if key_age_days > 180:
                             alert = True
+                            service_account_keys_total += 1
                             logger.warning('Service Account key older than 180 days [{0}]: {1}'.format(key_age_days,
                                                                                                        keyname))
                         else:
