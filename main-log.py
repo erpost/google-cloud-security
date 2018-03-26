@@ -318,7 +318,7 @@ def get_non_us_vpc_subnets():
     # write to tempfile
     term = 'Non-US Subnets:'
     data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Subnet(s) Total' \
-           '\n\n'.format(term, non_us_vpc_subnets_total,non_us_vpc_subnets_errors, total_subnets)
+           '\n\n'.format(term, non_us_vpc_subnets_total, non_us_vpc_subnets_errors, total_subnets)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -327,12 +327,13 @@ def get_non_us_vpc_subnets():
 def get_user_accounts():
     """logs User Accounts not part of the specified GCP Organization"""
     alert = False
+    total_users = 0
+    user_list = []
     user_account_total = 0
     user_account_errors = 0
 
     logger.info('-----Checking for non-organizational accounts in IAM-----')
     for project in get_projects():
-        user_list = []
         try:
             service = discovery.build('cloudresourcemanager', 'v1')
             request = service.projects().getIamPolicy(resource=project, body={})
@@ -341,16 +342,17 @@ def get_user_accounts():
 
             for binding in bindings:
                 for member in binding['members']:
-                    if member.startswith('user:') and domain not in member:
-                        alert = True
+                    if member.startswith('user:'):
                         if member not in user_list:
-                            user_account_total += 1
-                            logger.warning('Project "{0}" contains non-organizational account "{1}"'.
-                                           format(project, member))
+                            total_users += 1
                             user_list.append(member)
+                            if domain not in member:
+                                logger.warning('Project "{0}" contains non-organizational account "{1}"'.
+                                               format(project, member))
+                                alert = True
+                                user_account_total += 1
                         else:
                             pass
-
         except KeyError as err:
             logger.info('No User Accounts found in project "{0}": {1}'.format(project, err))
 
@@ -363,8 +365,8 @@ def get_user_accounts():
 
     # write to tempfile
     term = 'Non-Organizational Accounts in IAM:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_total, user_account_errors)
-
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} User(s) Total' \
+           '\n\n'.format(term, user_account_total, user_account_errors, total_users)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
