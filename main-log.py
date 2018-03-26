@@ -204,12 +204,14 @@ def get_service_account_keys():
                     key_age_years = relativedelta(enddate, startdate).years
 
                     if key_age_years > 1:
-                        total_keys += 1
-                        key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                        if key_age_days > 20:
+                        key_age_days = datetime.now().timetuple().tm_yday - startdate.timetuple().tm_yday
+
+                        if key_age_days > 180:
                             alert = True
-                            service_account_keys_total += 1
-                            logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
+                            logger.warning('Service Account key older than 180 days [{0}]: {1}'.format(key_age_days,
+                                                                                                       keyname))
+                        else:
+                            logger.info('Service Account key is {0} days old: {1}'.format(key_age_days, keyname))
 
         except KeyError:
             logger.info('No Service Accounts found in project "{0}"'.format(project))
