@@ -400,8 +400,8 @@ def get_user_accounts_buckets():
                         if member.startswith('user:') and domain not in member:
                             alert = True
                             user_account_bucket_total += 1
-                            logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
-                                           format(bucket.name, project, member))
+                            logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}" '
+                                           'with {3} permission'.format(bucket.name, project, member, role))
 
         except Exception as err:
             user_account_bucket_errors += 1
