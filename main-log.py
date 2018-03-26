@@ -205,7 +205,7 @@ def get_service_account_keys():
 
                     if key_age_years > 1:
                         total_keys += 1
-                        key_age_days = datetime.now().timetuple().tm_yday - startdate.timetuple().tm_yday
+                        key_age_days = (datetime.utcnow() - startdate).days
 
                         if key_age_days > 180:
                             alert = True

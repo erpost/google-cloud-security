@@ -3,7 +3,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 
@@ -52,7 +52,7 @@ for project in get_projects():
                 key_age_years = relativedelta(enddate, startdate).years
 
                 if key_age_years > 1:
-                    key_age_days = datetime.now().timetuple().tm_yday - startdate.timetuple().tm_yday
+                    key_age_days = (datetime.utcnow() - startdate).days
 
                     if key_age_days > 180:
                         alert = True
