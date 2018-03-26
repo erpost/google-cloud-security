@@ -6,6 +6,8 @@ from gcp import get_key, get_projects
 import os
 import logging
 
+from pprint import pprint
+
 
 # Logs all Cloud SQL Databases with Authorized Networks
 
@@ -34,24 +36,27 @@ handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
 
-def get_sql_version():
+def get_sql_users():
     """logs all Cloud SQL Database Users"""
     alert = False
-    sql_version = 'SECOND_GEN'
-    sql_version_total = 0
-    sql_version_errors = 0
+    # sql_version_total = 0
+    # sql_version_errors = 0
 
-    logger.info('-----Checking SQL versions-----')
-    for project in get_projects():
-        try:
-            service = discovery.build('sqladmin', 'v1beta4')
-            request = service.instances().list(project=project)
-            response = request.execute()
+    # logger.info('-----Checking SQL versions-----')
+    # for project in get_projects():
+    #     try:
+    project = 'allofus-forseti'
+    instance = 'first-gen'
+    service = discovery.build('sqladmin', 'v1beta4')
+    request = service.users().list(project=project, instance=instance)
+    response = request.execute()
+    pprint(response)
 
-            if 'items' in response:
-                items = response['items']
-                for item in items:
-                    db_name = item['name']
+        # if 'items' in response:
+        #     items = response['items']
+        #     for item in items:
+        #         # db_name = item['name']
+        #         print(item)
 
             #             alert = True
             #             sql_version_total += 1
@@ -65,23 +70,23 @@ def get_sql_version():
             # else:
             #     logger.info('0 Databases in Project "{0}"'.format(project))
 
-        except Exception as err:
-            sql_version_errors += 1
-            logger.error(err)
+        # except Exception as err:
+        #     sql_version_errors += 1
+        #     logger.error(err)
 
-    if alert is False:
-        logger.info('No non-2nd Generation Cloud SQL Versions found')
-
-    # write to tempfile
-    term = 'Cloud SQL Versions not equal to 2nd Generation:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_version_total, sql_version_errors)
-    findings.write(bytes(data, 'UTF-8'))
+    # if alert is False:
+    #     logger.info('No non-2nd Generation Cloud SQL Versions found')
+    #
+    # # write to tempfile
+    # term = 'Cloud SQL Versions not equal to 2nd Generation:'
+    # data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_version_total, sql_version_errors)
+    # findings.write(bytes(data, 'UTF-8'))
 
     return alert
 
 
 if __name__ == "__main__":
-    get_sql_version()
-    findings.seek(0)
-    print(findings.read().decode())
-    findings.close()
+    get_sql_users()
+    # findings.seek(0)
+    # print(findings.read().decode())
+    # findings.close()
