@@ -3,7 +3,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from gcp import get_key, get_projects
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 
@@ -51,11 +51,15 @@ for project in get_projects():
                 enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
                 key_age_years = relativedelta(enddate, startdate).years
 
-                if key_age_years > 180:
-                    key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                    if key_age_days > 1:
+                if key_age_years > 1:
+                    key_age_days = (datetime.utcnow() - startdate).days
+
+                    if key_age_days > 180:
                         alert = True
-                        logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
+                        logger.warning('Service Account key older than 180 days [{0}]: {1}'.format(key_age_days,
+                                                                                                   keyname))
+                    else:
+                        logger.info('Service Account key is {0} days old: {1}'.format(key_age_days, keyname))
 
     except KeyError:
         logger.info('No Service Accounts found in project "{0}"'.format(project))

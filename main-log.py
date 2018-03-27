@@ -12,18 +12,14 @@ import re
 import logging
 import credentials
 
-# set organization domain (e.g "example.com")
+
+# set variables
+sql_version = 'SECOND_GEN'
 domain = credentials.get_org_domain()
 
 # set GCP key
 if os.path.isfile(get_key()):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = get_key()
-
-# open tempfile
-findings = TemporaryFile()
-opener = 'Hello, \n\nBelow are the high-level findings for Google Cloud. ' \
-         'Check logs for specific findings and errors.\n\n\n'
-findings.write(bytes(opener, 'UTF-8'))
 
 # set logging path
 path = os.path.expanduser('~/python-logs')
@@ -42,10 +38,17 @@ handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
 
+# open tempfile
+findings = TemporaryFile()
+opener = 'Hello, \n\nBelow are the high-level findings for Google Cloud. Check logs for specific ' \
+         'findings and/or errors.\n\n---\nGoogle Projects: {}\n---\n\n'.format(len(get_projects()))
+findings.write(bytes(opener, 'UTF-8'))
+
 
 def get_world_readable_buckets():
     """logs world-readable buckets with AllUsers or AllAuthenticatedUsers permissions"""
     alert = False
+    total_buckets = 0
     world_bucket_total = []
     world_bucket_errors = 0
 
@@ -56,6 +59,7 @@ def get_world_readable_buckets():
 
         try:
             for bucket in buckets:
+                total_buckets += 1
                 policy = bucket.get_iam_policy()
                 for role in policy:
                     members = policy[role]
@@ -76,9 +80,9 @@ def get_world_readable_buckets():
         logger.info('No world-readable Bucket permissions found')
 
     # write to tempfile
-    term = 'Buckets with World-Readable Permissions:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(world_bucket_total), world_bucket_errors)
-
+    term = 'Buckets found with World-Readable Permissions:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Bucket(s) Total' \
+           '\n\n'.format(term, len(world_bucket_total), world_bucket_errors, total_buckets)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -87,6 +91,7 @@ def get_world_readable_buckets():
 def get_legacy_bucket_permissions():
     """logs all buckets containing legacy permissions"""
     alert = False
+    total_buckets = 0
     legacy_bucket_total = []
     legacy_bucket_errors = 0
 
@@ -97,6 +102,7 @@ def get_legacy_bucket_permissions():
 
         try:
             for bucket in buckets:
+                total_buckets += 1
                 policy = bucket.get_iam_policy()
                 for role in policy:
                     members = policy[role]
@@ -116,9 +122,9 @@ def get_legacy_bucket_permissions():
         logger.info('No Legacy Bucket permissions found')
 
     # write to tempfile
-    term = 'Buckets with Legacy Permissions:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, len(legacy_bucket_total), legacy_bucket_errors)
-
+    term = 'Buckets found with Legacy Permissions:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Bucket(s) Total' \
+           '\n\n'.format(term, len(legacy_bucket_total), legacy_bucket_errors, total_buckets)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -127,6 +133,7 @@ def get_legacy_bucket_permissions():
 def get_default_service_accounts():
     """logs Default Service Accounts found in IAM > Service Accounts"""
     alert = False
+    total_accounts = 0
     service_account_total = 0
     service_account_errors = 0
 
@@ -140,6 +147,7 @@ def get_default_service_accounts():
             accounts = response['accounts']
 
             for account in accounts:
+                total_accounts += 1
                 serviceaccount = account['email']
 
                 if 'gserviceaccount.com' in serviceaccount and 'iam' not in serviceaccount:
@@ -159,97 +167,9 @@ def get_default_service_accounts():
 
     # write to tempfile
     term = 'Default Service Accounts:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, service_account_total, service_account_errors)
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Service Account(s) Total' \
+           '\n\n'.format(term, service_account_total, service_account_errors, total_accounts)
 
-    findings.write(bytes(data, 'UTF-8'))
-
-    return alert
-
-
-def get_default_vpc():
-    """logs Default VPCs"""
-    alert = False
-    default_vpc_total = 0
-    default_vpc_errors = 0
-
-    logger.info('-----Checking for default VPCs-----')
-    for project in get_projects():
-        try:
-            service = discovery.build('compute', 'v1')
-            request = service.networks().list(project=project)
-            response = request.execute()
-            items = response['items']
-
-            for item in items:
-                vpc = item['name']
-                autocreate = item['autoCreateSubnetworks']
-
-                if vpc == 'default' and autocreate is True:
-                    alert = True
-                    default_vpc_total += 1
-                    logger.warning(' Default VPC Network "{0}" found in project "{1}"'.format(vpc, project))
-
-        except KeyError:
-            logger.info('No VPCs found in project "{0}"'.format(project))
-
-        except Exception as err:
-            default_vpc_errors += 1
-            logger.error(err)
-
-    if alert is False:
-        logger.info('No Default VPCs found')
-
-    # write to tempfile
-    term = 'Default VPCs:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, default_vpc_total, default_vpc_errors)
-
-    findings.write(bytes(data, 'UTF-8'))
-
-    return alert
-
-
-def get_non_us_vpc_subnets():
-    """logs all non-US Subnets"""
-    alert = False
-    non_us_vpc_subnets_total = 0
-    non_us_vpc_subnets_errors = 0
-
-    logger.info('-----Checking for non-US VPC subnets-----')
-    for project in get_projects():
-        try:
-            service = discovery.build('compute', 'v1')
-            request = service.networks().list(project=project)
-            response = request.execute()
-            items = response['items']
-
-            for item in items:
-                vpc = item['name']
-                subnetworks = item['subnetworks']
-
-                for subnetwork in subnetworks:
-                    subnets = re.findall('regions/(.*)/subnetworks', subnetwork)
-
-                    for subnet in subnets:
-                        if 'us-' not in subnet:
-                            alert = True
-                            non_us_vpc_subnets_total += 1
-                            logger.warning('Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.
-                                           format(subnet, vpc, project))
-
-        except KeyError:
-            logger.info('No VPCs found in project "{0}"'.format(project))
-
-        except Exception as err:
-            non_us_vpc_subnets_errors += 1
-            logger.error(err)
-
-    if alert is False:
-        logger.info('No non-US subnets found')
-
-    # write to tempfile
-    term = 'Non-US Subnets:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, non_us_vpc_subnets_total,
-                                                                   non_us_vpc_subnets_errors)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -258,6 +178,7 @@ def get_non_us_vpc_subnets():
 def get_service_account_keys():
     """logs all Service Accounts Keys that are older than 180 days"""
     alert = False
+    total_keys = 0
     service_account_keys_total = 0
     service_account_keys_errors = 0
 
@@ -282,12 +203,17 @@ def get_service_account_keys():
                     enddate = datetime.strptime(key['validBeforeTime'], '%Y-%m-%dT%H:%M:%SZ')
                     key_age_years = relativedelta(enddate, startdate).years
 
-                    if key_age_years > 180:
-                        key_age_days = relativedelta(datetime.utcnow(), startdate).days
-                        if key_age_days > 1:
+                    if key_age_years > 1:
+                        total_keys += 1
+                        key_age_days = (datetime.utcnow() - startdate).days
+
+                        if key_age_days > 180:
                             alert = True
                             service_account_keys_total += 1
-                            logger.warning('Service Account key is older than 180 days: {0}'.format(keyname))
+                            logger.warning('Service Account key older than 180 days [{0}]: {1}'.format(key_age_days,
+                                                                                                       keyname))
+                        else:
+                            logger.info('Service Account key is {0} days old: {1}'.format(key_age_days, keyname))
 
         except KeyError:
             logger.info('No Service Accounts found in project "{0}"'.format(project))
@@ -301,8 +227,102 @@ def get_service_account_keys():
 
     # write to tempfile
     term = 'Service Account Keys Older than 180 days:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, service_account_keys_total,
-                                                                   service_account_keys_errors)
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Service Account Key(s) Total' \
+           '\n\n'.format(term, service_account_keys_total, service_account_keys_errors, total_keys)
+    findings.write(bytes(data, 'UTF-8'))
+
+    return alert
+
+
+def get_default_vpc():
+    """logs Default VPCs"""
+    alert = False
+    total_vpcs = 0
+    default_vpc_total = 0
+    default_vpc_errors = 0
+
+    logger.info('-----Checking for default VPCs-----')
+    for project in get_projects():
+        try:
+            service = discovery.build('compute', 'v1')
+            request = service.networks().list(project=project)
+            response = request.execute()
+            items = response['items']
+
+            for item in items:
+                vpc = item['name']
+                autocreate = item['autoCreateSubnetworks']
+                total_vpcs += 1
+
+                if vpc == 'default' and autocreate is True:
+                    alert = True
+                    default_vpc_total += 1
+                    logger.warning(' Default VPC Network "{0}" found in project "{1}"'.format(vpc, project))
+
+        except KeyError:
+            logger.info('No VPCs found in project "{0}"'.format(project))
+
+        except Exception as err:
+            default_vpc_errors += 1
+            logger.error(err)
+
+    if alert is False:
+        logger.info('No Default VPCs found')
+
+    # write to tempfile
+    term = 'Default VPCs:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} VPC(s) Total' \
+           '\n\n'.format(term, default_vpc_total, default_vpc_errors, total_vpcs)
+
+    findings.write(bytes(data, 'UTF-8'))
+
+    return alert
+
+
+def get_non_us_vpc_subnets():
+    """logs all non-US Subnets"""
+    alert = False
+    total_subnets = 0
+    non_us_vpc_subnets_total = 0
+    non_us_vpc_subnets_errors = 0
+
+    logger.info('-----Checking for non-US VPC subnets-----')
+    for project in get_projects():
+        try:
+            service = discovery.build('compute', 'v1')
+            request = service.networks().list(project=project)
+            response = request.execute()
+            items = response['items']
+
+            for item in items:
+                vpc = item['name']
+                subnetworks = item['subnetworks']
+
+                for subnetwork in subnetworks:
+                    subnets = re.findall('regions/(.*)/subnetworks', subnetwork)
+
+                    for subnet in subnets:
+                        total_subnets += 1
+                        if 'us-' not in subnet:
+                            alert = True
+                            non_us_vpc_subnets_total += 1
+                            logger.warning('Non-US subnet "{0}" found in VPC "{1}" in project "{2}"'.
+                                           format(subnet, vpc, project))
+
+        except KeyError:
+            logger.info('No VPCs found in project "{0}"'.format(project))
+
+        except Exception as err:
+            non_us_vpc_subnets_errors += 1
+            logger.error(err)
+
+    if alert is False:
+        logger.info('No non-US subnets found')
+
+    # write to tempfile
+    term = 'Non-US Subnets:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Subnet(s) Total' \
+           '\n\n'.format(term, non_us_vpc_subnets_total, non_us_vpc_subnets_errors, total_subnets)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -311,12 +331,13 @@ def get_service_account_keys():
 def get_user_accounts():
     """logs User Accounts not part of the specified GCP Organization"""
     alert = False
+    total_users = 0
+    user_list = []
     user_account_total = 0
     user_account_errors = 0
 
     logger.info('-----Checking for non-organizational accounts in IAM-----')
     for project in get_projects():
-        user_list = []
         try:
             service = discovery.build('cloudresourcemanager', 'v1')
             request = service.projects().getIamPolicy(resource=project, body={})
@@ -325,16 +346,17 @@ def get_user_accounts():
 
             for binding in bindings:
                 for member in binding['members']:
-                    if member.startswith('user:') and domain not in member:
-                        alert = True
+                    if member.startswith('user:'):
                         if member not in user_list:
-                            user_account_total += 1
-                            logger.warning('Project "{0}" contains non-organizational account "{1}"'.
-                                           format(project, member))
+                            total_users += 1
                             user_list.append(member)
+                            if domain not in member:
+                                logger.warning('Project "{0}" contains non-organizational account "{1}"'.
+                                               format(project, member))
+                                alert = True
+                                user_account_total += 1
                         else:
                             pass
-
         except KeyError as err:
             logger.info('No User Accounts found in project "{0}": {1}'.format(project, err))
 
@@ -347,8 +369,8 @@ def get_user_accounts():
 
     # write to tempfile
     term = 'Non-Organizational Accounts in IAM:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_total, user_account_errors)
-
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} User(s) Total' \
+           '\n\n'.format(term, user_account_total, user_account_errors, total_users)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -357,6 +379,7 @@ def get_user_accounts():
 def get_user_accounts_buckets():
     """logs User Accounts tied to GCP Buckets that are not part of the specified GCP Organization"""
     alert = False
+    total_buckets = 0
     user_account_bucket_total = 0
     user_account_bucket_errors = 0
 
@@ -367,6 +390,7 @@ def get_user_accounts_buckets():
             buckets = storage_client.list_buckets()
 
             for bucket in buckets:
+                total_buckets += 1
                 policy = bucket.get_iam_policy()
 
                 for role in policy:
@@ -376,8 +400,8 @@ def get_user_accounts_buckets():
                         if member.startswith('user:') and domain not in member:
                             alert = True
                             user_account_bucket_total += 1
-                            logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}"'.
-                                           format(bucket.name, project, member))
+                            logger.warning(' Bucket "{0}" in Project "{1}" contains non-organizational account "{2}" '
+                                           'with {3} permission'.format(bucket.name, project, member, role))
 
         except Exception as err:
             user_account_bucket_errors += 1
@@ -388,8 +412,8 @@ def get_user_accounts_buckets():
 
     # write to tempfile
     term = 'Non-Organizational Accounts with permissions on Buckets:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, user_account_bucket_total,
-                                                                   user_account_bucket_errors)
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} Bucket(s) Total' \
+           '\n\n'.format(term, user_account_bucket_total, user_account_bucket_errors, total_buckets)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -398,6 +422,7 @@ def get_user_accounts_buckets():
 def get_sql_unsecure_connections():
     """logs all Cloud SQL Databases without enforced SSL Connections"""
     alert = False
+    total_sql = 0
     sql_unsecure_connection_total = 0
     sql_unsecure_connection_errors = 0
 
@@ -411,6 +436,7 @@ def get_sql_unsecure_connections():
             if 'items' in response:
                 items = response['items']
                 for item in items:
+                    total_sql += 1
                     db_name = item['name']
                     if 'requireSsl' not in item['settings']['ipConfiguration']:
                         logger.warning('Database "{0}" in Project "{1}" does not have SSL enforced'.
@@ -434,8 +460,8 @@ def get_sql_unsecure_connections():
 
     # write to tempfile
     term = 'Cloud SQL Databases with No Enforced SSL:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_unsecure_connection_total,
-                                                                   sql_unsecure_connection_errors)
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} SQL Database(s) Total' \
+           '\n\n'.format(term, sql_unsecure_connection_total, sql_unsecure_connection_errors, total_sql)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -444,6 +470,7 @@ def get_sql_unsecure_connections():
 def get_sql_auth_networks():
     """logs all Cloud SQL Databases with Authorized Networks"""
     alert = False
+    total_sql = 0
     sql_auth_networks_total = 0
     sql_auth_networks_errors = 0
 
@@ -457,6 +484,7 @@ def get_sql_auth_networks():
             if 'items' in response:
                 items = response['items']
                 for item in items:
+                    total_sql += 1
                     db_name = item['name']
                     auth_nets = item['settings']['ipConfiguration']['authorizedNetworks']
                     if auth_nets:
@@ -483,8 +511,58 @@ def get_sql_auth_networks():
 
     # write to tempfile
     term = 'Cloud SQL Databases with Authorized Networks:'
-    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n\n'.format(term, sql_auth_networks_total,
-                                                                   sql_auth_networks_errors)
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} SQL Database(s) Total' \
+           '\n\n'.format(term, sql_auth_networks_total, sql_auth_networks_errors, total_sql)
+    findings.write(bytes(data, 'UTF-8'))
+
+    return alert
+
+
+def get_sql_version():
+    """logs all Cloud SQL Database Users"""
+    alert = False
+    total_sql = 0
+    sql_version_total = 0
+    sql_version_errors = 0
+
+    logger.info('-----Checking SQL versions-----')
+    for project in get_projects():
+        try:
+            service = discovery.build('sqladmin', 'v1beta4')
+            request = service.instances().list(project=project)
+            response = request.execute()
+
+            if 'items' in response:
+                items = response['items']
+                for item in items:
+                    total_sql += 1
+                    db_name = item['name']
+                    db_ver = item['backendType']
+
+                    if db_ver != sql_version:
+                        alert = True
+                        sql_version_total += 1
+                        logger.warning('Database "{0}" in Project "{1}" is version: {2}'.
+                                       format(db_name, project, db_ver))
+                        alert = True
+                    else:
+                        logger.info('Database "{0}" in Project "{1}" is version: {2}'.
+                                    format(db_name, project, db_ver))
+
+            else:
+                logger.info('0 Databases in Project "{0}"'.format(project))
+
+        except Exception as err:
+            sql_version_errors += 1
+            logger.error(err)
+
+    if alert is False:
+        logger.info('No non-2nd Generation Cloud SQL Versions found')
+
+    # write to tempfile
+    term = 'Cloud SQL Versions not equal to 2nd Generation:'
+    data = '{}\n- {:>4} Violation(s)\n- {:>4} Error(s)\n- {:>4} SQL Database(s) Total' \
+           '\n\n'.format(term, sql_version_total, sql_version_errors, total_sql)
     findings.write(bytes(data, 'UTF-8'))
 
     return alert
@@ -531,13 +609,14 @@ if __name__ == "__main__":
     get_world_readable_buckets()
     get_legacy_bucket_permissions()
     get_default_service_accounts()
+    get_service_account_keys()
     get_default_vpc()
     get_non_us_vpc_subnets()
-    get_service_account_keys()
     get_user_accounts()
     get_user_accounts_buckets()
     get_sql_unsecure_connections()
     get_sql_auth_networks()
+    get_sql_version()
 
     # write tempfile to email body and delete
     findings.seek(0)
