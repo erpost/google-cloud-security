@@ -2,9 +2,9 @@ from google.cloud import storage
 from googleapiclient import discovery
 from logging.handlers import RotatingFileHandler
 from tempfile import TemporaryFile
-from gcp import get_key, get_projects
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from gcp import get_key, get_projects
 
 import os
 import smtplib
