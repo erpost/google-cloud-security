@@ -1,11 +1,9 @@
 from google.cloud import storage
 from logging.handlers import RotatingFileHandler
-from gcp import get_key, get_projects
+from gcp import get_key, get_projects, send_gmail
 
 import os
 import logging
-import credentials
-import smtplib
 
 
 """Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names"""
@@ -34,41 +32,6 @@ logger.setLevel(logging.INFO)
 handler = RotatingFileHandler(logfile, maxBytes=5*1024*1024, backupCount=5)
 handler.setFormatter(log_formatter)
 logger.addHandler(handler)
-
-
-def send_gmail(subject, body):
-    """send email alert"""
-    logger.info('Sending email')
-    recipient = credentials.get_recipient_email()
-    subject = subject
-
-    # gmail sign-in
-    gmail_sender = credentials.get_sender_email()
-    gmail_passwd = credentials.get_password()
-    try:
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.ehlo()
-        server.starttls()
-        server.login(gmail_sender, gmail_passwd)
-    except smtplib.SMTPAuthenticationError:
-        logger.error('Bad credentials.  Exiting...')
-        exit(1)
-    except Exception as err:
-        logger.error('Gmail failure: {0}'.format(err))
-        exit(1)
-
-    body = '\r\n'.join(['To: %s' % recipient,
-                        'From: %s' % gmail_sender,
-                        'Subject: %s' % subject,
-                        '', body])
-
-    try:
-        server.sendmail(gmail_sender, [recipient], body)
-        logger.info('Email sent!')
-    except Exception as err:
-        logger.error('Sending mail failure: {0}'.format(err))
-
-    server.quit()
 
 
 for project_name in get_projects():
