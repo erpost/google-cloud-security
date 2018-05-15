@@ -8,7 +8,7 @@ import smtplib
 import credentials
 
 
-"""Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names"""
+#Removes Global Permissions from Google Cloud Platform Buckets and sends Email with Bucket and Project Names
 
 alert = False
 bucket_dict = {}
