@@ -33,20 +33,23 @@ for project_name in get_projects():
     storage_client = storage.Client(project=project_name)
     buckets = storage_client.list_buckets()
 
-    for bucket in buckets:
-        policy = bucket.get_iam_policy()
-        for role in policy:
-            members = policy[role]
+    try:
+        for bucket in buckets:
+            policy = bucket.get_iam_policy()
+            for role in policy:
+                members = policy[role]
 
-            for member in members:
-                if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
-                    alert = True
-                    logger.warning('"{0}" permissions were removed from Bucket "{1}" in project "{2}"'.
-                                   format(member, bucket.name, project_name))
-                    bucket_dict[bucket.name] = project_name
-                    policy = bucket.get_iam_policy()
-                    policy[role].discard(member)
-                    bucket.set_iam_policy(policy)
+                for member in members:
+                    if role == 'roles/storage.legacyBucketOwner' or role == 'roles/storage.legacyBucketReader':
+                        alert = True
+                        logger.warning('"{0}" permissions were removed from Bucket "{1}" in project "{2}"'.
+                                       format(member, bucket.name, project_name))
+                        bucket_dict[bucket.name] = project_name
+                        policy = bucket.get_iam_policy()
+                        policy[role].discard(member)
+                        bucket.set_iam_policy(policy)
+    except Exception as err:
+        logger.error(err)
 
 if alert is False:
     logger.info('No Legacy Bucket permissions found')
