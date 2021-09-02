@@ -13,8 +13,6 @@
 | Cloud SQL SSL not Enforced | Completed | N/A | Checks for Cloud SQL Instances that don't have SSL Encryption required |
 | Cloud SQL Authorized Networks Allowed | Completed | N/A | Checks for Cloud SQL Instances that have IPs Whitelisted |
 | Cloud SQL Generation | Completed | N/A | Checks that 2nd Generation Cloud SQL Instances are being used |
-| Cloud SQL User Accounts | TBD | | |
-| Data Access Logs Enabled | TBD | N/A | Checks that [Data Access](https://cloud.google.com/logging/docs/audit/configure-data-access) Logs are enabled |
 
 **How to install Python 3 and use the script(s):**
 
